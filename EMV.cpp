@@ -4,7 +4,8 @@
 
 class user_data{
     public:
-    char name[40];  /// trivial number
+    char fname[20];
+    char lname[20]; /// trivial number
     float balance;
     char address[100];
     char location_currency[50];
@@ -15,27 +16,33 @@ class terminal_PODL{
     // what does the terminal gotta do?
     //  amount, the country code, the currency, the date,the transaction type, and the terminal’s random number UN 
     //  called Unpredictable Number in EMV’s terminology
-    int tun [30];
+    int TUN [30];
     char currency [4];
     char date [8]; /// idk how to create a better time getter. for now only use time stamp. 
     char transaction_type [2];
 
 };
 
+class bank {
+    //meow
+};
+
 /// maybe another class for the initial payment?
 int main () {
      // Intialised user data
     user_data user1; /// safety measure over char to prevet buffer overflows.
-    strncpy(user1.name, "Bob,", sizeof(user1.name) - 1);
-    user1.name[sizeof(user1.name) - 1] = '\0';
+    strncpy(user1.fname, "Bob,", sizeof(user1.fname) - 1);
+    user1.fname[sizeof(user1.fname) - 1] = '\0';
+    strncpy(user1.lname, "Star", sizeof(user1.lname) - 1);
+    user1.lname[sizeof(user1.lname) - 1] = '\0';
     user1.balance = 120;
-    strncpy(user1.address, "11 silly street,", sizeof(user1.address) - 1);
+    strncpy(user1.address, "11 silly street, Switzerland", sizeof(user1.address) - 1);
     user1.address[sizeof(user1.address) - 1] = '\0';
-    strncpy(user1.location_currency, "Swiss francx", sizeof(user1.location_currency) -1);
+    strncpy(user1.location_currency, "Swiss francks", sizeof(user1.location_currency) -1);
     user1.location_currency[sizeof(user1.location_currency) - 1] = '\0';
 
     // print statement to make sure all is good.
-    std::cout << user1.name << " has " << user1.balance << " Swiz Francs" << " and lives in " << user1.address << " using " << user1.location_currency << std::endl;
+    std::cout << user1.fname << user1.lname << " has " << user1.balance << " CHF " << " and lives in " << user1.address << " using " << user1.location_currency << std::endl;
     
     
     // intialise payment method request.
