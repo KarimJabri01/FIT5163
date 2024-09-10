@@ -9,17 +9,53 @@ class user_data{ /// AID, could rename later
     float balance;
     char address[100];
     char location_currency[50];
+};
     
-
+///maybe do getter class
     // card dummy
-    void card(){
-        int cardno [4] = {5454, 6465, 8665, 9786}; 
-        int ccv[3] = {7, 6, 1};
-        int exp_date[5] = {1, 2, 0, 5};
 
-    };
+class Card { /// define better scope
+public:
+    // Constructor to initialize the card number
+    Card(const std::string& card_number) : card_number(card_number) {}
 
-}; // reminder for semi-colon
+    void check() {
+        if (card_number.length() < 15) {
+            std::cout << "Card number is too short" << std::endl;
+            return;
+        }
+
+        // Extract the first 5 characters
+        std::string first_five_digits = card_number.substr(0, 5);
+        int carddet = std::stoi(first_five_digits);
+
+        card_check(carddet); // Call card_check with the extracted digits
+    }
+
+private:
+    
+    std::string card_number;
+
+    void card_check(int carddet) const {
+        if (carddet > 5000) {
+            std::cout << "Card is Mastercard" << std::endl;
+        }
+        else if (carddet >= 4000 && carddet < 5000) {
+            std::cout << "Card is Visa" << std::endl;
+        }
+        else if (carddet >= 3000 && carddet < 4000) {
+            std::cout << "Card is EuroMaster" << std::endl;
+        }
+        else {
+            std::cout << "Card is invalid" << std::endl;
+        }
+    }
+};
+
+   
+
+ 
+ // reminder for semi-colon
 
 class terminal_PODL{
     // what does the terminal gotta do?
@@ -38,6 +74,23 @@ class bank {
 
 /// maybe another class for the initial payment?
 int main () {
+    ///// this gotta be not an input but maybe store in a class.
+    std::string card_number;
+    std::cout << "Input Card Number: ";
+    std::cin >> card_number;
+    ///
+    std::string ccv;
+    std::cout << "Input CCV: ";
+    std::cin >> ccv;
+    /// Create Data
+    std::string expiry_date;
+    std::cout << "Input your Expiry Date:  ";
+    std::cin >> expiry_date;
+    // Create a Card object and check the card
+    Card card(card_number);
+    card.check();
+
+
      // Intialised user data
     user_data user1; /// safety measure over char to prevet buffer overflows.
     strncpy(user1.fname, "Bob,", sizeof(user1.fname) - 1);
@@ -80,7 +133,5 @@ int main () {
 
 
     return 0; 
-};
-
-
+}
 
