@@ -2,13 +2,22 @@
 #include <string>
 #include <ctime>
 
-class user_data{
+class user_data{ /// AID, could rename later  
     public:
     char fname[20];
     char lname[20]; /// trivial number
     float balance;
     char address[100];
     char location_currency[50];
+    
+
+    // card dummy
+    void card(){
+        int cardno [4] = {5454, 6465, 8665, 9786}; 
+        int ccv[3] = {7, 6, 1};
+        int exp_date[5] = {1, 2, 0, 5};
+
+    };
 
 }; // reminder for semi-colon
 
@@ -38,7 +47,7 @@ int main () {
     user1.balance = 120;
     strncpy(user1.address, "11 silly street, Switzerland", sizeof(user1.address) - 1);
     user1.address[sizeof(user1.address) - 1] = '\0';
-    strncpy(user1.location_currency, "Swiss francks", sizeof(user1.location_currency) -1);
+    strncpy(user1.location_currency, "Swiss francs", sizeof(user1.location_currency) -1);
     user1.location_currency[sizeof(user1.location_currency) - 1] = '\0';
 
     // print statement to make sure all is good.
@@ -71,5 +80,7 @@ int main () {
 
 
     return 0; 
-}
+};
+
+
 
