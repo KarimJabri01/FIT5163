@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <ctime>
+#include <limits>
+#include <cstring>
 
 class user_data{ /// AID, could rename later  
     public:
@@ -59,8 +61,8 @@ private:
 
 class terminal_PODL{
     // what does the terminal gotta do?
-    //  amount, the country code, the currency, the date,the transaction type, and the terminal’s random number UN 
-    //  called Unpredictable Number in EMV’s terminology
+    //  amount, the country code, the currency, the date,the transaction type, and the terminal's random number UN 
+    //  called Unpredictable Number in EMV's terminology
     int TUN [30];
     char currency [4];
     char date [8]; /// idk how to create a better time getter. for now only use time stamp. 
@@ -134,4 +136,3 @@ int main () {
 
     return 0; 
 }
-
