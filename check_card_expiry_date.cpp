@@ -1,8 +1,7 @@
 #include <iostream>
 #include <ctime> 
 #include <sstream> 
-#ifndef CHECK_CARD
-#define CHECK_CARD
+
 // Function to get the current month and year
 void getCurrentMonthYear(int &currentMonth, int &currentYear) {
     time_t t = time(0);
@@ -50,5 +49,3 @@ int main() {
 
     return 0;
 }
-
-#endif
