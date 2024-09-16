@@ -16,9 +16,6 @@ bool isCardExpired(int expMonth, int expYear) {
     int currentMonth, currentYear;
     getCurrentMonthYear(currentMonth, currentYear);
 
-    std::cout << "Current Month: " << currentMonth << ", Current Year: " << currentYear << std::endl;
-    std::cout << "Expiration Month: " << expMonth << ", Expiration Year: " << expYear << std::endl;
-
     // If the expiration year is less than the current year, the card is expired
     if (expYear < currentYear) {
         return true;  // Card is expired
@@ -34,24 +31,21 @@ bool isCardExpired(int expMonth, int expYear) {
 }
 
 int main() {
-    
+    // Example expiration date (MM/YY)
     int expMonth, expYear;
     std::string expDate;
 
     std::cout << "Enter the card's expiration date (MM/YY): ";
     std::cin >> expDate;
 
- 
+    // Parsing the expiration date from the input string
     std::stringstream ss(expDate);
     char delimiter;
     ss >> expMonth >> delimiter >> expYear;
 
     // Check if the card is expired
-    if (isCardExpired(expMonth, expYear)) {
-        std::cout << "The card is expired." << std::endl;
-    } else {
-        std::cout << "The card is not expired." << std::endl;
-    }
+    bool expired = isCardExpired(expMonth, expYear);
+    std::cout << std::boolalpha << expired << std::endl;
 
     return 0;
 }
