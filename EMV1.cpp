@@ -4,6 +4,7 @@
 #include <limits>
 #include <cstring>
 #include <sstream>
+#include "check_card_epiry_date.h"
 
 class user_data{ /// AID, could rename later  
     public:
@@ -34,7 +35,10 @@ public:
         }
 
         std::stringstream ss(exp_date);
-        if (isCardExpired(exp_date)) {
+        int exp_mon, exp_yr;
+        char delimeter;
+        ss >> exp_mon >> delimeter >> exp_yr;
+        if (CHECK_CARD::isCardExpired(exp_mon, exp_yr)) {
             std::cout << "Your card is EXPIRED!" << std::endl;
         }
     } //: card_number(card_number) {}
