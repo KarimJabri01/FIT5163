@@ -4,7 +4,35 @@
 #include <limits>
 #include <cstring>
 #include <sstream>
-#include "check_card_expiry_date.h"
+
+
+// Function to get the current month and year
+void getCurrentMonthYear(int &currentMonth, int &currentYear) {
+    time_t t = time(0);
+    struct tm *now = localtime(&t);
+    
+    currentMonth = now->tm_mon + 1;  // tm_mon is zero-based (0-11), so add 1
+    currentYear = (now->tm_year + 1900) % 100; // Get last two digits of year
+}
+
+// Function to check if the card is expired
+bool isCardExpired(int expMonth, int expYear) {
+    int currentMonth, currentYear;
+    getCurrentMonthYear(currentMonth, currentYear);
+
+    // If the expiration year is less than the current year, the card is expired
+    if (expYear < currentYear) {
+        return true;  // Card is expired
+    }
+
+    // If the expiration year is the same, but the expiration month is less than the current month
+    if (expYear == currentYear && expMonth < currentMonth) {
+        return true;  // Card is expired
+    }
+
+    // If the expiration month is the current month or in the future, it's valid
+    return false;  // Card is not expired
+}
 
 class user_data{ /// AID, could rename later  
     public:
@@ -38,7 +66,7 @@ public:
         int exp_mon, exp_yr;
         char delimeter;
         ss >> exp_mon >> delimeter >> exp_yr;
-        if (CheckCard::isCardExpired(exp_mon, exp_yr)) {
+        if (isCardExpired(exp_mon, exp_yr)) {
             std::cout << "Your card is EXPIRED!" << std::endl;
         }
     } //: card_number(card_number) {}
