@@ -3,8 +3,8 @@
 
 class CheckCard {
 public:
-    void getCurrentMonthYear(int &currentMonth, int &currentYear);
-    bool isCardExpired(int expMonth, int expYear);
+    static void getCurrentMonthYear(int &currentMonth, int &currentYear);
+    static bool isCardExpired(int expMonth, int expYear);
 };
 
 #endif
