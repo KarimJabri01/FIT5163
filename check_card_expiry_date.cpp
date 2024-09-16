@@ -1,10 +1,10 @@
 #include <iostream>
 #include <ctime> 
 #include <sstream>
-#include "check_card_epiry_date.h"
+#include "check_card_expiry_date.h"
 
 // Function to get the current month and year
-void getCurrentMonthYear(int &currentMonth, int &currentYear) {
+void CheckCard::getCurrentMonthYear(int &currentMonth, int &currentYear) {
     time_t t = time(0);
     struct tm *now = localtime(&t);
     
@@ -13,9 +13,9 @@ void getCurrentMonthYear(int &currentMonth, int &currentYear) {
 }
 
 // Function to check if the card is expired
-bool isCardExpired(int expMonth, int expYear) {
+bool CheckCard::isCardExpired(int expMonth, int expYear) {
     int currentMonth, currentYear;
-    getCurrentMonthYear(currentMonth, currentYear);
+    CheckCard::getCurrentMonthYear(currentMonth, currentYear);
 
     // If the expiration year is less than the current year, the card is expired
     if (expYear < currentYear) {
@@ -45,7 +45,7 @@ int main() {
     ss >> expMonth >> delimiter >> expYear;
 
     // Check if the card is expired
-    bool expired = isCardExpired(expMonth, expYear);
+    bool expired = CheckCard::isCardExpired(expMonth, expYear);
     std::cout << std::boolalpha << expired << std::endl;
 
     return 0;
