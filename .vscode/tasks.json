@@ -9,7 +9,11 @@
                 "-g",
                 "${file}",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "-I",
+                "C:/Users/Ben108/AppData/Local/Programs/MySys2/mingw64/include/cryptopp",
+                "-L",
+                "C:/Users/Ben108/AppData/Local/Programs/MySys2/mingw64/lib"
             ],
             "options": {
                 "cwd": "${fileDirname}"

@@ -15,16 +15,16 @@
 class UserData{ /// changes include replacing C type arras to more secure cpp ones
     public:
     
-    UserData(const std::string& firstName, const std::string& lastName, double balance, const std::string& address, const std::string& currency)
-             : fname(firstName), lname(lastName), bl(balance), user_address(address), location_currency(currency) {}
+    UserData(const std::string& firstName, const std::string& lastName, double in_balance, const std::string& in_address, const std::string& currency)
+             : fname(firstName), lname(lastName), balance(in_balance), address(in_address), location_currency(currency) {}
     void DisplayUserInfo() const{
-        std::cout << fname << " " << lname << " " << "has" < bl << " " << location_currency << "residing at" << user_address << std::endl;
+        std::cout << fname << " " << lname << " " << "has" << balance << " " << location_currency << "residing at" << address << std::endl;
     }
 
     private: // private for user security.
     std::string fname;
     std::string lname;
-    double bl; 
+    double balance {}; 
     std::string address;
     std::string location_currency;
 };
@@ -40,16 +40,17 @@ private:
     const std::string exp_date;
     // Constructor to initialize the card number
     
-    void GetCurrentMonthYear(int &currenmonth, int &currentyear) const{
+    void GetCurrentMonthYear(int &currentmonth, int &currentyear) const{
         time_t t = time (0);
-        currentmonth = now ->tm_mon + 1; // tm-mon is zero based, add 1 for allowing twelve month.
+        struct tm*now = localtime(&t);
+        currentmonth = (now ->tm_mon) + 1; // tm-mon is zero based, add 1 for allowing twelve month.
         currentyear = (now ->tm_year) + 1900 % 100; // gets last two digits by using modulo and 1900.
     }
 
     bool IsCardExpired(int expmonth, int expyear) const {
         int currentmonth, currentyear; // access time in format.
-        GetCurrentMonthYear (currentmonth, currentyear);
-        return (expyear < currentyear) || (expyear == currentyear && expmonth == currentmont); // backchecks if dates match.
+        GetCurrentMonthYear(currentmonth, currentyear);
+        return (expyear < currentyear) || (expyear == currentyear && expmonth == currentmonth); // backchecks if dates match.
     }
    
    bool ValidatedLunh() const {
@@ -67,14 +68,14 @@ private:
         return (sum % 10 == 0);
     }
     std::string DetermineCardType () const {
-        if (card_number[0] == '4' && (card_number.lenght == 13 || card_number.length == 16 || card_number.lenght == 19)) {
+        if (card_number[0] == '4' && (card_number.length() == 13 || card_number.length() == 16 || card_number.length() == 19)) {
         return "The Card is Visa";
     }
      int first_two_digits = std::stoi(card_number.substr(0,2));
      int first_four_digits = std::stoi(card_number.substr(0,4));
 
-     if (card_number.lenght() == 16 && ((first_two_digits >= 51 && first_two_digits <= 55) || (first_four_digits > 2221 && first_four_digits <= 2720))) { // check for args
-        return " The Card is MasterCard/EuroCard" // determine card 
+     if (card_number.length() == 16 && ((first_two_digits >= 51 && first_two_digits <= 55) || (first_four_digits > 2221 && first_four_digits <= 2720))) { // check for args
+        return " The Card is MasterCard/EuroCard"; // determine card 
      }
 
      return "Invalid Card Type"; //else invalid card
@@ -92,7 +93,7 @@ public:
         char delimiter;
         ss >> expiry_month >> delimiter >> expiry_year;
 
-        if (isCardExpired(expiry_month, expiry_year)) { // function check car is expired
+        if (IsCardExpired(expiry_month, expiry_year)) { // function check car is expired
             throw std::runtime_error("Your card is expired");
         }
     }
@@ -103,9 +104,9 @@ public:
             return;
         }
 
-        if (validateLuhn()) {
+        if (ValidatedLunh()) {
             std::cout << "Card Number is VALID" << std::endl;  /// valid cards
-            std::cout << "Card Type: " << determineCardType() << std::endl; // calling function 
+            std::cout << "Card Type: " << DetermineCardType() << std::endl; // calling function 
         } else {
             std::cout << "Card Number is INVALID!" << std::endl; // error handling
         }
@@ -188,7 +189,7 @@ int main() {
     }
 
     UserData user("Bob", "Star", 120.0, "11 Silly Street, Switzerland", "CHF");
-    user.printUserInfo();
+    user.DisplayUserInfo();
 
     selectPaymentMethod();
 

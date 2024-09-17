@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}",
-                "cryptopp/**"
+                "C:/Users/Ben108/AppData/Local/Programs/MySys2/mingw64/include/cryptopp"
             ],
             "defines": [
                 "_DEBUG",
