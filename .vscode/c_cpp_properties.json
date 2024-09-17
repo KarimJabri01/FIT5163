@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}",
+                "cryptopp/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "cStandard": "c23",
+            "cppStandard": "c++23",
+            "intelliSenseMode": "windows-clang-x64",
+            "compilerPath": "C:/Users/Ben108/AppData/Local/Programs/MySys2/ucrt64/bin/g++.exe"
+        }
+    ],
+    "version": 4
+}
