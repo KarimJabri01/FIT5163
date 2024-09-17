@@ -15,8 +15,8 @@
 class UserData{ /// changes include replacing C type arras to more secure cpp ones
     public:
     
-    UserData(const std::string& firstName, const std::string& lastName, double in_balance, const std::string& in_address, const std::string& currency)
-             : fname(firstName), lname(lastName), balance(in_balance), address(in_address), location_currency(currency) {}
+    UserData(const std::string& firstName, const std::string& lastName, double balance, const std::string& address, const std::string& currency)
+             : fname(firstName), lname(lastName), balance(balance), address(address), location_currency(currency) {}
     void DisplayUserInfo() const{
         std::cout << fname << " " << lname << " " << "has" << balance << " " << location_currency << "residing at" << address << std::endl;
     }
