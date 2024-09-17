@@ -24,7 +24,7 @@ class UserData{ /// changes include replacing C type arras to more secure cpp on
     private: // private for user security.
     std::string fname;
     std::string lname;
-    double balance = 0; 
+    double balance; 
     std::string address;
     std::string location_currency;
 };
