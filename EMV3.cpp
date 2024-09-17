@@ -52,21 +52,29 @@ private:
         GetCurrentMonthYear(currentmonth, currentyear);
         return (expyear < currentyear) || (expyear == currentyear && expmonth == currentmonth); // backchecks if dates match.
     }
-   
    bool ValidatedLunh() const {
-    int sum = 0; // application of lunhs card recognition algorithm
-    bool alternate = false;
-    for (int i = card_number.length() - 1; i >= 0; i--) { //add explanation when you guys can.
-            int n = card_number[i] - '0';
-            if (alternate) {
-                n *= 2;
-                if (n > 9) n -= 9;
-            }
-            sum += n;
-            alternate = !alternate;
-        }
-        return (sum % 10 == 0);
+    if (card_number.empty()) {
+        std::cout << "Card number is empty" << std::endl;
+        return false;
     }
+
+    if (!std::all_of(card_number.begin(), card_number.end(), ::isdigit)) {
+        std::cout << "Card number contains invalid characters" << std::endl;
+        return false;
+    }
+    int sum = 0; 
+    bool alternate = false;
+    for (int i = card_number.length() - 1; i >= 0; i--) {
+        int n = card_number[i] - '0';
+        if (alternate) {
+            n *= 2;
+            if (n > 9) n -= 9;
+        }
+        sum += n;
+        alternate = !alternate;
+    }
+    return (sum % 10 == 0);
+}
     std::string DetermineCardType () const {
         if (card_number[0] == '4' && (card_number.length() == 13 || card_number.length() == 16 || card_number.length() == 19)) {
         return "The Card is Visa";
@@ -99,18 +107,35 @@ public:
     }
 
     void check() const {
-        if (card_number.length() < 13) {
-            std::cout << "Card number is too short" << std::endl; /// error if card is too short
+     if (card_number.empty()) {
+            std::cout << "Card number is empty" << std::endl; // Check for empty input
             return;
-        }
-
-        if (ValidatedLunh()) {
-            std::cout << "Card Number is VALID" << std::endl;  /// valid cards
-            std::cout << "Card Type: " << DetermineCardType() << std::endl; // calling function 
-        } else {
-            std::cout << "Card Number is INVALID!" << std::endl; // error handling
-        }
     }
+
+    if (card_number.length() < 13) {
+        std::cout << "Card number is too short" << std::endl; 
+        return;
+    }
+
+    if (card_number.length() > 19) {
+        std::cout << "Card number is too long" << std::endl; 
+        return;
+    }
+
+    // Ensure all characters are digits
+    if (!std::all_of(card_number.begin(), card_number.end(), ::isdigit)) {
+        std::cout << "Card number contains invalid characters" << std::endl; 
+        return;
+    }
+
+    if (ValidatedLunh()) {
+        std::cout << "Card Number is VALID" << std::endl;
+        std::cout << "Card Type: " << DetermineCardType() << std::endl;
+    } else {
+        std::cout << "Card Number is INVALID!" << std::endl;
+    }
+}
+
 };
 
 /// RSA ALGORITHM START
