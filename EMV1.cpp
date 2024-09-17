@@ -173,7 +173,37 @@ class bank {
 };
 
 /// maybe another class for the initial payment?
+
+
+void generateRSAKeys(CryptoPP::RSA::PublicKey &publicKey, CryptoPP::RSA::PrivateKey &privateKey){
+
+    CryptoPP::AutoSeededRandomPool rng;
+    privateKey.GenerateRandomWithKeySize(rng, 2048);
+    publicKey.AssignFrom(privateKey);
+}
+
+std::string encryptCardNumber(const std::string &cardNumber, CryptoPP::RSA::PublicKey &publicKey){
+    CryptoPP::AutoSeededRandomPool rng;
+    std::string cipher;
+
+    CryptoPP::RSAES_OAEP_SHA_Encryptor encryptor(publicKey);
+    CryptoPP::StringSource ss1(cardNumber, true, new CryptoPP::PK_EncryptorFilter(rng, encryptor, new CryptoPP::StringSink(cipher)));
+    return cipher;
+}
+
+std::string decryptCardNumber(const std::string &cipher, CryptoPP::RSA::PrivateKey &privateKey){
+    CryptoPP::AutoSeededRandomPool rng;
+    std::string recovered;
+
+    CryptoPP::RSAES_OAEP_SHA_Decryptor decryptor(privateKey);
+    CryptoPP::StringSource ss4(cipher,true, new CryptoPP::PK_DecryptorFilter(rng, decryptor, new CryptoPP::StringSink(recovered)));
+    return recovered;
+}
+
 int main () {
+    CryptoPP::RSA::PublicKey publicKey;
+    CryptoPP::RSA::PrivateKey privateKey;
+    generateRSAKeys(publicKey, privateKey);
     ///// this gotta be not an input but maybe store in a class.
     std::string card_number;
     std::cout << "Input Card Number: ";
