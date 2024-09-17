@@ -44,7 +44,7 @@ private:
         time_t t = time (0);
         struct tm*now = localtime(&t);
         currentmonth = (now ->tm_mon) + 1; // tm-mon is zero based, add 1 for allowing twelve month.
-        currentyear = (now ->tm_year) + 1900 % 100; // gets last two digits by using modulo and 1900.
+        currentyear = (now ->tm_year) % 100; // gets last two digits by using modulo and 1900.
     }
 
     bool IsCardExpired(int expmonth, int expyear) const {
