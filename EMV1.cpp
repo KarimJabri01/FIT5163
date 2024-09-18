@@ -1,24 +1,51 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <ctime>
 #include <limits>
 #include <cstring>
 #include <sstream>
-#include <cryptopp/rsa.h>
-#include <cryptopp/osrng.h>
-#include <cryptopp/hex.h>
-#include <cryptopp/base64.h>
-#include <cryptopp/files.h>
-#include <cryptopp/filters.h>
+// #include <cryptopp/rsa.h>
+// #include <cryptopp/osrng.h>
+// #include <cryptopp/hex.h>
+// #include <cryptopp/base64.h>
+// #include <cryptopp/files.h>
+// #include <cryptopp/filters.h>
+#include <filesystem>
 
 
-class user_data{ /// AID, could rename later  
+class UserData{ /// changes include replacing C type arras to more secure cpp ones
     public:
-    char fname[20];
-    char lname[20]; /// trivial number
-    double balance{};
-    char address[100];
-    char location_currency[50];
+    
+    UserData(const std::string& firstName, const std::string& lastName, double balance, const std::string& address, const std::string& currency)
+             : fname(firstName), lname(lastName), balance(balance), address(address), location_currency(currency) {}
+    void DisplayUserInfo() const{
+        std::cout << fname << " " << lname << " " << " has " <<  balance << "  " << location_currency << " residing at " << address << std::endl;
+    }
+
+     void SaveToCSV(UserData user) const {
+        std::string filename="user_data.csv";
+        
+        // Check if file exists; if not, add headers
+        if (!std::filesystem::exists(filename)) {
+            std::ofstream file(filename);
+            file.open(filename, std::ios::out);
+            file << "First Name,Last Name,Balance,Address,Currency\n"; // Add headers
+            file.close();
+        } else {
+            std::fstream file(filename, std::ios::app); // Append if the file exists
+            file << fname << "," << lname << "," << balance << "," << address << "," << location_currency << "\n";
+            file.close();
+        }
+        
+    }
+
+    private: // private for user security.
+    std::string fname;
+    std::string lname;
+    double balance; 
+    std::string address;
+    std::string location_currency;
 };
     
 ///maybe do getter class
@@ -169,7 +196,21 @@ class terminal_PODL{
 };
 
 class bank {
-    //meow
+    /*
+    read and write the data from csv file (geters and setters)
+    fetch the data
+    bank should call encryption and decryption functions
+    then check the functions
+    respond to terminal  
+    hash function that hash the passowords in the terminal and the bank 
+    compare the hash values inside the terminal 
+    
+    private key only for the bank and public key for everyone
+    */
+    
+    
+    public:
+        bank(const std::string& )
 };
 
 /// maybe another class for the initial payment?

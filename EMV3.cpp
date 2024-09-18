@@ -4,12 +4,14 @@
 #include <limits>
 #include <cstring>
 #include <sstream>
-#include "cryptopp/rsa.h"
-#include "cryptopp/osrng.h"
-#include "cryptopp/hex.h"
-#include "cryptopp/base64.h"
-#include "cryptopp/files.h"
-#include "cryptopp/filters.h"
+// #include "cryptopp/rsa.h"
+// #include "cryptopp/osrng.h"
+// #include "cryptopp/hex.h"
+// #include "cryptopp/base64.h"
+// #include "cryptopp/files.h"
+// #include "cryptopp/filters.h"
+
+
 
 
 class UserData{ /// changes include replacing C type arras to more secure cpp ones
@@ -116,27 +118,27 @@ public:
 /// RSA ALGORITHM START
 // RSA key generation and encryption/decryption functions
 
-void generateRSAKeys(CryptoPP::RSA::PublicKey &publicKey, CryptoPP::RSA::PrivateKey &privateKey) {
-    CryptoPP::AutoSeededRandomPool rng;
-    privateKey.GenerateRandomWithKeySize(rng, 2048);
-    publicKey.AssignFrom(privateKey);
-}
+// void generateRSAKeys(CryptoPP::RSA::PublicKey &publicKey, CryptoPP::RSA::PrivateKey &privateKey) {
+//     CryptoPP::AutoSeededRandomPool rng;
+//     privateKey.GenerateRandomWithKeySize(rng, 2048);
+//     publicKey.AssignFrom(privateKey);
+// }
 
-std::string encryptCardNumber(const std::string &cardNumber, CryptoPP::RSA::PublicKey &publicKey) {
-    CryptoPP::AutoSeededRandomPool rng;
-    std::string cipher;
-    CryptoPP::RSAES_OAEP_SHA_Encryptor encryptor(publicKey);
-    CryptoPP::StringSource ss1(cardNumber, true, new CryptoPP::PK_EncryptorFilter(rng, encryptor, new CryptoPP::StringSink(cipher)));
-    return cipher;
-}
+// std::string encryptCardNumber(const std::string &cardNumber, CryptoPP::RSA::PublicKey &publicKey) {
+//     CryptoPP::AutoSeededRandomPool rng;
+//     std::string cipher;
+//     CryptoPP::RSAES_OAEP_SHA_Encryptor encryptor(publicKey);
+//     CryptoPP::StringSource ss1(cardNumber, true, new CryptoPP::PK_EncryptorFilter(rng, encryptor, new CryptoPP::StringSink(cipher)));
+//     return cipher;
+// }
 
-std::string decryptCardNumber(const std::string &cipher, CryptoPP::RSA::PrivateKey &privateKey) {
-    CryptoPP::AutoSeededRandomPool rng;
-    std::string recovered;
-    CryptoPP::RSAES_OAEP_SHA_Decryptor decryptor(privateKey);
-    CryptoPP::StringSource ss4(cipher, true, new CryptoPP::PK_DecryptorFilter(rng, decryptor, new CryptoPP::StringSink(recovered)));
-    return recovered;
-}
+// std::string decryptCardNumber(const std::string &cipher, CryptoPP::RSA::PrivateKey &privateKey) {
+//     CryptoPP::AutoSeededRandomPool rng;
+//     std::string recovered;
+//     CryptoPP::RSAES_OAEP_SHA_Decryptor decryptor(privateKey);
+//     CryptoPP::StringSource ss4(cipher, true, new CryptoPP::PK_DecryptorFilter(rng, decryptor, new CryptoPP::StringSink(recovered)));
+//     return recovered;
+// }
 
 void inputCardDetails(std::string& cardNumber, std::string& cvv, std::string& expiryDate) {
     std::cout << "Input Card Number: ";
@@ -173,9 +175,9 @@ void selectPaymentMethod() {
 // Payment method end. 
 
 int main() {
-    CryptoPP::RSA::PublicKey publicKey;
-    CryptoPP::RSA::PrivateKey privateKey;
-    generateRSAKeys(publicKey, privateKey);
+    // CryptoPP::RSA::PublicKey publicKey;
+    // CryptoPP::RSA::PrivateKey privateKey;
+    // generateRSAKeys(publicKey, privateKey);
 
     std::string card_number, cvv, expiry_date;
     inputCardDetails(card_number, cvv, expiry_date);
@@ -193,11 +195,11 @@ int main() {
 
     selectPaymentMethod();
 
-    std::string encryptedCardNumber = encryptCardNumber(card_number, publicKey);
-    std::cout << "Encrypted Card Number: " << encryptedCardNumber << std::endl;
+    // std::string encryptedCardNumber = encryptCardNumber(card_number, publicKey);
+    // std::cout << "Encrypted Card Number: " << encryptedCardNumber << std::endl;
 
-    std::string decryptedCardNumber = decryptCardNumber(encryptedCardNumber, privateKey);
-    std::cout << "Decrypted Card Number: " << decryptedCardNumber << std::endl;
+    // std::string decryptedCardNumber = decryptCardNumber(encryptedCardNumber, privateKey);
+    // std::cout << "Decrypted Card Number: " << decryptedCardNumber << std::endl;
 
     return 0;
 }
