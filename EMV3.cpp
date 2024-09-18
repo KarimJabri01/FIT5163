@@ -52,29 +52,42 @@ private:
         GetCurrentMonthYear(currentmonth, currentyear);
         return (expyear < currentyear) || (expyear == currentyear && expmonth == currentmonth); // backchecks if dates match.
     }
-   bool ValidatedLunh() const {
-    if (card_number.empty()) {
-        std::cout << "Card number is empty" << std::endl;
-        return false;
+ ///luhn greater strcture and comments.
+    bool ValidatedLunh() const {   /// this lumnh algorithm is causing trouble with some cards.
+        if (card_number.empty()) {   // new test for empty 
+            std::cout << "Card number is empty" << std::endl;
+            return false;
+        }
+
+        if (!std::all_of(card_number.begin(), card_number.end(), ::isdigit)) {   // test for invalid characters.
+            std::cout << "Card number contains invalid characters" << std::endl;
+            return false;
+        }
+        int sum = 0;
+        bool alternate = false;
+        std::cout << "Calculating Luhn sum: ";
+        for (int i = card_number.length() - 1; i >= 0; i--) { // check for card lenght
+            int n = card_number[i] - '0';
+            if (alternate) {
+                n *= 2;
+                std::cout << "[" << (card_number[i] - '0') << " doubled to " << n;
+                if (n > 9) {
+                    n -= 9; // Adjust for numbers greater than 9
+                    std::cout << ", adjusted to " << n << "]";
+                } else {
+                    std::cout << "]";
+                }
+            } else {
+                std::cout << "[" << n << "]";
+            }
+            sum += n; ///  check for sum is provided
+            alternate = !alternate; // alternation cannot be alternate.
+        }
+        std::cout << "\nLuhn Calculation Sum: " << sum << std::endl; // test to make sure the calculation is fine.
+        return (sum % 10 == 0);
     }
 
-    if (!std::all_of(card_number.begin(), card_number.end(), ::isdigit)) {
-        std::cout << "Card number contains invalid characters" << std::endl;
-        return false;
-    }
-    int sum = 0; 
-    bool alternate = false;
-    for (int i = card_number.length() - 1; i >= 0; i--) {
-        int n = card_number[i] - '0';
-        if (alternate) {
-            n *= 2;
-            if (n > 9) n -= 9;
-        }
-        sum += n;
-        alternate = !alternate;
-    }
-    return (sum % 10 == 0);
-}
+    //finish of lunhu
     std::string DetermineCardType () const {
         if (card_number[0] == '4' && (card_number.length() == 13 || card_number.length() == 16 || card_number.length() == 19)) {
         return "The Card is Visa";
