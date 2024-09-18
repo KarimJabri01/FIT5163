@@ -36,7 +36,7 @@ class Card { // const kept, even in private for greater security.
 
 private:
     const std::string card_number;
-    const std::string cvv;
+    const int cvv;
     const std::string exp_date;
     // Constructor to initialize the card number
     
@@ -103,9 +103,9 @@ private:
  }
 
 public:
-    Card(const std::string &in_card_number, const std::string &in_cvv, const std::string &in_exp_date) 
+    Card(const std::string &in_card_number, const int &in_cvv, const std::string &in_exp_date) 
         : card_number(in_card_number), cvv(in_cvv), exp_date(in_exp_date) {
-        if (cvv.length() != 3) { // check length
+        if (cvv < 100 || cvv > 999){  // check length using three digits.
             throw std::invalid_argument("CVV code is incorrect"); // error if ccv is incorrect
         }
 
@@ -176,7 +176,7 @@ std::string decryptCardNumber(const std::string &cipher, CryptoPP::RSA::PrivateK
     return recovered;
 }
 
-void inputCardDetails(std::string& cardNumber, std::string& cvv, std::string& expiryDate) {
+void inputCardDetails(std::string& cardNumber, int &cvv, std::string& expiryDate) {
     std::cout << "Input Card Number: ";
     std::cin >> cardNumber;
 
@@ -215,7 +215,8 @@ int main() {
     CryptoPP::RSA::PrivateKey privateKey;
     generateRSAKeys(publicKey, privateKey);
 
-    std::string card_number, cvv, expiry_date;
+    std::string card_number, expiry_date;
+    int cvv;
     inputCardDetails(card_number, cvv, expiry_date);
 
     try {
