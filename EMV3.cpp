@@ -84,7 +84,7 @@ private:
             alternate = !alternate; // alternation cannot be alternate.
         }
         std::cout << "\nLuhn Calculation Sum: " << sum << std::endl; // test to make sure the calculation is fine.
-        return (sum % 10 == 0);
+        return (sum % 10 == 0); // for card to be valid is must be divisible by 10.
     }
 
     //finish of lunhu
@@ -226,7 +226,7 @@ int main() {
         return 1;
     }
 
-    UserData user("Bob", "Star", 120.0, "11 Silly Street, Switzerland", "CHF");
+    UserData user("Bob", "Star", 120.0, "11 Park Avenue, Switzerland", "CHF");
     user.DisplayUserInfo();
 
     selectPaymentMethod();
