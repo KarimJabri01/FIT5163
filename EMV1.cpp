@@ -14,38 +14,43 @@
 #include <filesystem>
 
 
-class UserData{ /// changes include replacing C type arras to more secure cpp ones
+class UserData { /// changes include replacing C type arras to more secure cpp ones
     public:
     
     UserData(const std::string& firstName, const std::string& lastName, double balance, const std::string& address, const std::string& currency)
-             : fname(firstName), lname(lastName), balance(balance), address(address), location_currency(currency) {}
+             : fname(firstName), lname(lastName), balance(balance), address(address), location_currency(currency) {
+                acc_num = ++next_acc_num;
+             }
     void DisplayUserInfo() const{
         std::cout << fname << " " << lname << " " << " has " <<  balance << "  " << location_currency << " residing at " << address << std::endl;
     }
 
      void SaveToCSV(UserData user) const {
-        std::string filename="user_data.csv";
+        std::string filename = "user_data.csv";
         
         // Check if file exists; if not, add headers
         if (!std::filesystem::exists(filename)) {
             std::ofstream file(filename);
             file.open(filename, std::ios::out);
-            file << "First Name,Last Name,Balance,Address,Currency\n"; // Add headers
+            file << "Account Number,First Name,Last Name,Balance,Address,Currency\n"; // Add headers
             file.close();
         } else {
             std::fstream file(filename, std::ios::app); // Append if the file exists
-            file << fname << "," << lname << "," << balance << "," << address << "," << location_currency << "\n";
+            file << acc_num << "," << fname << "," << lname << "," << balance << "," << address << "," << location_currency << "\n";
             file.close();
         }
         
     }
 
     private: // private for user security.
+    int acc_num{};
     std::string fname;
     std::string lname;
     double balance; 
     std::string address;
     std::string location_currency;
+
+    static int next_acc_num;
 };
     
 ///maybe do getter class
@@ -195,7 +200,33 @@ class terminal_PODL{
 
 };
 
-class bank {
+class Bank {
+private:
+    // std::string &pk;
+    // std::string &sk;
+
+public:
+    void CreatUser() {
+        std::string fname;
+        std::cout << "Enter first name: " << std::endl;
+        std::cin >> fname;
+
+        std::string lname;
+        std::cout << "Enter last name: " << std::endl;
+        std::cin >> lname;
+
+        std::string currency;
+        std::cout << "Enter currency: " << std::endl;
+        std::cin >> currency;
+
+        std::string address;
+        std::cout << "Enter address: " << std::endl;
+        std::cin >> address;
+
+        double balance = 0;
+
+        UserData customer(fname, lname, balance, address, currency);
+    }
     /*
     read and write the data from csv file (geters and setters)
     fetch the data
@@ -209,13 +240,13 @@ class bank {
     */
     
     
-    public:
-        bank(const std::string& )
+    //public:
+        //bank(const std::string& );
 };
 
 /// maybe another class for the initial payment?
 
-
+/*
 void generateRSAKeys(CryptoPP::RSA::PublicKey &publicKey, CryptoPP::RSA::PrivateKey &privateKey){
 
     CryptoPP::AutoSeededRandomPool rng;
@@ -240,43 +271,37 @@ std::string decryptCardNumber(const std::string &cipher, CryptoPP::RSA::PrivateK
     CryptoPP::StringSource ss4(cipher,true, new CryptoPP::PK_DecryptorFilter(rng, decryptor, new CryptoPP::StringSink(recovered)));
     return recovered;
 }
+*/
+
+int UserData::next_acc_num = 1000;
 
 int main () {
-    CryptoPP::RSA::PublicKey publicKey;
-    CryptoPP::RSA::PrivateKey privateKey;
-    generateRSAKeys(publicKey, privateKey);
+    // CryptoPP::RSA::PublicKey publicKey;
+    // CryptoPP::RSA::PrivateKey privateKey;
+    // generateRSAKeys(publicKey, privateKey);
     ///// this gotta be not an input but maybe store in a class.
-    std::string card_number;
-    std::cout << "Input Card Number: ";
-    std::cin >> card_number;
-    ///
-    std::string cvv;
-    std::cout << "Input CVV: ";
-    std::cin >> cvv;
-    /// Create Data
-    std::string expiry_date;
-    std::cout << "Input your Expiry Date:  ";
-    std::cin >> expiry_date;
-    // Create a Card object and check the card
-    Card card(card_number, cvv, expiry_date);
-    card.check();
+    // std::string card_number;
+    // std::cout << "Input Card Number: ";
+    // std::cin >> card_number;
+    // ///
+    // std::string cvv;
+    // std::cout << "Input CVV: ";
+    // std::cin >> cvv;
+    // /// Create Data
+    // std::string expiry_date;
+    // std::cout << "Input your Expiry Date:  ";
+    // std::cin >> expiry_date;
+    // // Create a Card object and check the card
+    // Card card(card_number, cvv, expiry_date);
+    // card.check();
 
 
-     // Intialised user data
-    user_data user1; /// safety measure over char to prevet buffer overflows.
-    strncpy(user1.fname, "Bob,", sizeof(user1.fname) - 1);
-    user1.fname[sizeof(user1.fname) - 1] = '\0';
-    strncpy(user1.lname, "Star", sizeof(user1.lname) - 1);
-    user1.lname[sizeof(user1.lname) - 1] = '\0';
-    user1.balance = 120;
-    strncpy(user1.address, "11 silly street, Switzerland", sizeof(user1.address) - 1);
-    user1.address[sizeof(user1.address) - 1] = '\0';
-    strncpy(user1.location_currency, "Swiss francs", sizeof(user1.location_currency) -1);
-    user1.location_currency[sizeof(user1.location_currency) - 1] = '\0';
+    //  // Intialised user data
+    // UserData user1("Bob", "Star", 120.0, "11 Park Avenue, Switzerland", "CHF");
+    Bank b1;
+    b1.CreatUser();
 
-    // print statement to make sure all is good.
-    std::cout << user1.fname << user1.lname << " has " << user1.balance << " CHF " << " and lives in " << user1.address << " using " << user1.location_currency << std::endl;
-    
+    // user1.DisplayUserInfo();
     
     // intialise payment method request.
     
