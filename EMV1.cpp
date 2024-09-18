@@ -12,6 +12,7 @@
 // #include <cryptopp/files.h>
 // #include <cryptopp/filters.h>
 #include <filesystem>
+#include <vector>
 
 
 class UserData { /// changes include replacing C type arras to more secure cpp ones
@@ -19,26 +20,25 @@ class UserData { /// changes include replacing C type arras to more secure cpp o
     
     UserData(const std::string& firstName, const std::string& lastName, double balance, const std::string& address, const std::string& currency)
              : fname(firstName), lname(lastName), balance(balance), address(address), location_currency(currency) {
-                acc_num = ++next_acc_num;
+                acc_num = getLastRowOfColumn() + 1;
              }
     void DisplayUserInfo() const{
         std::cout << fname << " " << lname << " " << " has " <<  balance << "  " << location_currency << " residing at " << address << std::endl;
     }
 
-     void SaveToCSV(UserData user) const {
-        std::string filename = "user_data.csv";
-        
+    std::string filename = "user_data.csv";
+
+    void SaveToCSV() const {
         // Check if file exists; if not, add headers
         if (!std::filesystem::exists(filename)) {
             std::ofstream file(filename);
             file.open(filename, std::ios::out);
             file << "Account Number,First Name,Last Name,Balance,Address,Currency\n"; // Add headers
             file.close();
-        } else {
-            std::fstream file(filename, std::ios::app); // Append if the file exists
-            file << acc_num << "," << fname << "," << lname << "," << balance << "," << address << "," << location_currency << "\n";
-            file.close();
         }
+        std::fstream file(filename, std::ios::app); // Append if the file exists
+        file << acc_num << "," << fname << "," << lname << "," << balance << "," << address << "," << location_currency << "\n";
+        file.close();
         
     }
 
@@ -50,7 +50,33 @@ class UserData { /// changes include replacing C type arras to more secure cpp o
     std::string address;
     std::string location_currency;
 
-    static int next_acc_num;
+    int getLastRowOfColumn() {
+        std::vector<std::vector<std::string>> data;
+        std::ifstream file(filename);
+        std::string line;
+
+        while (getline(file, line)) {
+        std::stringstream lineStream(line);
+        std::string cell;
+        std::vector<std::string> row;
+
+        while (getline(lineStream, cell, ',')) {
+            row.push_back(cell);
+        }
+        data.push_back(row);
+    }
+
+        file.close();
+
+        if (data.empty() || 0 >= data[0].size()) {
+            return 1000;
+        }
+
+        int last_acc_num = std::stoi(data.back()[0]);
+        return last_acc_num;
+    }
+
+    //static int next_acc_num;
 };
     
 ///maybe do getter class
@@ -226,6 +252,8 @@ public:
         double balance = 0;
 
         UserData customer(fname, lname, balance, address, currency);
+        customer.SaveToCSV();
+        customer.DisplayUserInfo();
     }
     /*
     read and write the data from csv file (geters and setters)
@@ -273,7 +301,7 @@ std::string decryptCardNumber(const std::string &cipher, CryptoPP::RSA::PrivateK
 }
 */
 
-int UserData::next_acc_num = 1000;
+//int UserData::next_acc_num = 1000;
 
 int main () {
     // CryptoPP::RSA::PublicKey publicKey;
