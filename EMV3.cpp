@@ -4,14 +4,14 @@
 #include <limits>
 #include <cstring>
 #include <sstream>
-// #include "cryptopp/rsa.h"
-// #include "cryptopp/osrng.h"
-// #include "cryptopp/hex.h"
-// #include "cryptopp/base64.h"
-// #include "cryptopp/files.h"
-// #include "cryptopp/filters.h"
-
-
+#include "cryptopp/rsa.h"
+#include "cryptopp/osrng.h"
+#include "cryptopp/hex.h"
+#include "cryptopp/base64.h"
+#include "cryptopp/files.h"
+#include "cryptopp/filters.h"
+#include <filesystem>  // Use standard filesystem for C++17
+namespace fs = std::filesystem;
 
 
 class UserData{ /// changes include replacing C type arras to more secure cpp ones
@@ -23,12 +23,46 @@ class UserData{ /// changes include replacing C type arras to more secure cpp on
         std::cout << fname << " " << lname << " " << " has " <<  balance << "  " << location_currency << " residing at " << address << std::endl;
     }
 
+    // CSV initialisation
+    void SaveToCSV() const {
+        if (!fs::exists(filename)) {  // Using experimental filesystem
+            std::ofstream file(filename, std::ios::out);
+            file << "Account Number,First Name,Last Name,Balance,Address,Currency\n";  // Add headers
+        }
+        std::ofstream file(filename, std::ios::app);  // Append to the file
+        file << acc_num << "," << fname << "," << lname << "," << balance << "," << address << "," << location_currency << "\n";
+    }
+
     private: // private for user security.
     std::string fname;
     std::string lname;
     double balance; 
     std::string address;
     std::string location_currency;
+    // data for account number: 
+    int acc_num{};  // Declare acc_num here
+    const std::string filename = "userdata.csv";
+    
+    int getLastRowOfColumn() {
+        std::ifstream file(filename);
+        std::string line;
+        int last_acc_num = 1000;
+
+        while (getline(file, line)) {
+            std::stringstream lineStream(line);
+            std::string cell;
+            std::vector<std::string> row;
+
+            while (getline(lineStream, cell, ',')) {
+                row.push_back(cell);
+            }
+
+            if (!row.empty()) {
+                last_acc_num = std::stoi(row[0]);
+            }
+        }
+        return last_acc_num;
+    }
 };
     
 ///maybe do getter class
@@ -54,42 +88,37 @@ private:
         GetCurrentMonthYear(currentmonth, currentyear);
         return (expyear < currentyear) || (expyear == currentyear && expmonth == currentmonth); // backchecks if dates match.
     }
- ///luhn greater strcture and comments.
-    bool ValidatedLunh() const {   /// this lumnh algorithm is causing trouble with some cards.
-        if (card_number.empty()) {   // new test for empty 
-            std::cout << "Card number is empty" << std::endl;
-            return false;
-        }
-
-        if (!std::all_of(card_number.begin(), card_number.end(), ::isdigit)) {   // test for invalid characters.
-            std::cout << "Card number contains invalid characters" << std::endl;
-            return false;
-        }
-        int sum = 0;
-        bool alternate = false;
-        std::cout << "Calculating Luhn sum: ";
-        for (int i = card_number.length() - 1; i >= 0; i--) { // check for card lenght
-            int n = card_number[i] - '0';
-            if (alternate) {
-                n *= 2;
-                std::cout << "[" << (card_number[i] - '0') << " doubled to " << n;
-                if (n > 9) {
-                    n -= 9; // Adjust for numbers greater than 9
-                    std::cout << ", adjusted to " << n << "]";
-                } else {
-                    std::cout << "]";
-                }
-            } else {
-                std::cout << "[" << n << "]";
-            }
-            sum += n; ///  check for sum is provided
-            alternate = !alternate; // alternation cannot be alternate.
-        }
-        std::cout << "\nLuhn Calculation Sum: " << sum << std::endl; // test to make sure the calculation is fine.
-        return (sum % 10 == 0); // for card to be valid is must be divisible by 10.
+ ///luhn greater strcture and comments. + Log (n) better results. 
+    bool ValidatedLuhn() const {
+        if (card_number.empty()) {
+        std::cout << "Card number is empty" << std::endl;
+        return false;
     }
+    if (!std::all_of(card_number.begin(), card_number.end(), ::isdigit)) {
+        std::cout << "Card number contains invalid characters" << std::endl;
+        return false;
+    }
+    int sum = 0;
+    bool alternate = false;
+    // Iterate over card number from the rightmost digit
+    for (int i = card_number.length() - 1; i >= 0; --i) {
+        int n = card_number[i] - '0';
 
-    //finish of lunhu
+        // If it's an alternate digit, double it
+        if (alternate) {
+            n *= 2;
+            // If the result is greater than 9, subtract 9
+            if (n > 9) {
+                n -= 9;
+            }
+        }
+        
+        sum += n; 
+        alternate = !alternate;  // Flip the alternate flag
+    }
+return (sum % 10 == 0);
+}
+ //finish of lunhu
     std::string DetermineCardType () const {
         if (card_number[0] == '4' && (card_number.length() == 13 || card_number.length() == 16 || card_number.length() == 19)) {
         return "The Card is Visa";
@@ -102,7 +131,8 @@ private:
      }
 
      return "Invalid Card Type"; //else invalid card
- }
+}
+
 
 public:
     Card(const std::string &in_card_number, const int &in_cvv, const std::string &in_exp_date) 
@@ -143,7 +173,7 @@ public:
         return;
     }
 
-    if (ValidatedLunh()) {
+    if (ValidatedLuhn()) {
         std::cout << "Card Number is VALID" << std::endl;
         std::cout << "Card Type: " << DetermineCardType() << std::endl;
     } else {
@@ -153,30 +183,81 @@ public:
 
 };
 
+class bank {
+private:
+    std::string &pk;
+    generate
+    std::string &sk;
+
+public:
+    void CreatUser() {
+        std::string fname;
+        std::cout << "Enter first name: " << std::endl;
+        std::cin >> fname;
+
+        std::string lname;
+        std::cout << "Enter last name: " << std::endl;
+        std::cin >> lname;
+
+        std::string currency;
+        std::cout << "Enter currency: " << std::endl;
+        std::cin >> currency;
+
+        std::string address;
+        std::cout << "Enter address: " << std::endl;
+        std::cin >> address;
+
+        double balance = 0;
+
+        UserData customer(fname, lname, balance, address, currency);
+        customer.SaveToCSV();
+        customer.DisplayUserInfo();
+    }
+    /*
+    read and write the data from csv file (geters and setters)
+    fetch the data
+    bank should call encryption and decryption functions
+    then check the functions
+    respond to terminal  
+    hash function that hash the passowords in the terminal and the bank 
+    compare the hash values inside the terminal 
+    
+    private key only for the bank and public key for everyone
+    */
+    
+    
+    //public:
+        //bank(const std::string& );
+};
+
+
+
+
+
 /// RSA ALGORITHM START
 // RSA key generation and encryption/decryption functions
 
-// void generateRSAKeys(CryptoPP::RSA::PublicKey &publicKey, CryptoPP::RSA::PrivateKey &privateKey) {
-//     CryptoPP::AutoSeededRandomPool rng;
-//     privateKey.GenerateRandomWithKeySize(rng, 2048);
-//     publicKey.AssignFrom(privateKey);
-// }
+void generateRSAKeys(CryptoPP::RSA::PublicKey &publicKey, CryptoPP::RSA::PrivateKey &privateKey) {
+    CryptoPP::AutoSeededRandomPool rng;
+    privateKey.GenerateRandomWithKeySize(rng, 2048);
+    publicKey.AssignFrom(privateKey);
+}
 
-// std::string encryptCardNumber(const std::string &cardNumber, CryptoPP::RSA::PublicKey &publicKey) {
-//     CryptoPP::AutoSeededRandomPool rng;
-//     std::string cipher;
-//     CryptoPP::RSAES_OAEP_SHA_Encryptor encryptor(publicKey);
-//     CryptoPP::StringSource ss1(cardNumber, true, new CryptoPP::PK_EncryptorFilter(rng, encryptor, new CryptoPP::StringSink(cipher)));
-//     return cipher;
-// }
+std::string encryptCardNumber(const std::string &cardNumber, CryptoPP::RSA::PublicKey &publicKey) {
+    CryptoPP::AutoSeededRandomPool rng;
+    std::string cipher;
+    CryptoPP::RSAES_OAEP_SHA_Encryptor encryptor(publicKey);
+    CryptoPP::StringSource ss1(cardNumber, true, new CryptoPP::PK_EncryptorFilter(rng, encryptor, new CryptoPP::StringSink(cipher)));
+    return cipher;
+}
 
-// std::string decryptCardNumber(const std::string &cipher, CryptoPP::RSA::PrivateKey &privateKey) {
-//     CryptoPP::AutoSeededRandomPool rng;
-//     std::string recovered;
-//     CryptoPP::RSAES_OAEP_SHA_Decryptor decryptor(privateKey);
-//     CryptoPP::StringSource ss4(cipher, true, new CryptoPP::PK_DecryptorFilter(rng, decryptor, new CryptoPP::StringSink(recovered)));
-//     return recovered;
-// }
+std::string decryptCardNumber(const std::string &cipher, CryptoPP::RSA::PrivateKey &privateKey) {
+    CryptoPP::AutoSeededRandomPool rng;
+    std::string recovered;
+    CryptoPP::RSAES_OAEP_SHA_Decryptor decryptor(privateKey);
+    CryptoPP::StringSource ss4(cipher, true, new CryptoPP::PK_DecryptorFilter(rng, decryptor, new CryptoPP::StringSink(recovered)));
+    return recovered;
+}
 
 void inputCardDetails(std::string& cardNumber, int &cvv, std::string& expiryDate) {
     std::cout << "Input Card Number: ";
@@ -213,9 +294,9 @@ void selectPaymentMethod() {
 // Payment method end. 
 
 int main() {
-    // CryptoPP::RSA::PublicKey publicKey;
-    // CryptoPP::RSA::PrivateKey privateKey;
-    // generateRSAKeys(publicKey, privateKey);
+    CryptoPP::RSA::PublicKey publicKey;
+    CryptoPP::RSA::PrivateKey privateKey;
+    generateRSAKeys(publicKey, privateKey);
 
     std::string card_number, expiry_date;
     int cvv;
@@ -234,11 +315,13 @@ int main() {
 
     selectPaymentMethod();
 
-    // std::string encryptedCardNumber = encryptCardNumber(card_number, publicKey);
-    // std::cout << "Encrypted Card Number: " << encryptedCardNumber << std::endl;
+    std::string encryptedCardNumber = encryptCardNumber(card_number, publicKey);
+    std::cout << "Encrypted Card Number: " << encryptedCardNumber << std::endl;
 
-    // std::string decryptedCardNumber = decryptCardNumber(encryptedCardNumber, privateKey);
-    // std::cout << "Decrypted Card Number: " << decryptedCardNumber << std::endl;
+    std::string decryptedCardNumber = decryptCardNumber(encryptedCardNumber, privateKey);
+    std::cout << "Decrypted Card Number: " << decryptedCardNumber << std::endl;
 
+
+    std::cout << "Compiled successfully!" << std::endl;
     return 0;
 }
