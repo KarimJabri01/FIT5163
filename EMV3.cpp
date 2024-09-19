@@ -69,7 +69,7 @@ private:
     const std::string card_number;
     const int cvv;
     const std::string exp_date;
-     double balance;
+    double balance;
     std::string currency;
     const int account_nb;
     int pin;
