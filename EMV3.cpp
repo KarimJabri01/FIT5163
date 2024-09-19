@@ -269,13 +269,13 @@ class terminal {
     private:
         // Transaction struct to store details
         struct Transaction {
-            int TUN;  // Transaction unique number
+            long long int TUN;  // Transaction unique number
             std::string currency;
             std::string data;  // Transaction data
             std::string transaction_type;  // "Contactless" or "Contact"
 
             // Constructor
-            Transaction(int tun, const std::string& curr, const std::string& d, const std::string& t_type)
+            Transaction(long long int tun, const std::string& curr, const std::string& d, const std::string& t_type)
                 : TUN(tun), currency(curr), data(d), transaction_type(t_type) {}
         };
 
@@ -289,7 +289,7 @@ class terminal {
         }
 
         // Add a transaction (with user input for transaction type: "Contactless" or "Contact")
-        void add_transaction(int tun, const std::string& curr, const std::string& data) {
+        void add_transaction(long long int tun, const std::string& curr, const std::string& data) {
             std::string transaction_type = selectTransactionType();  // Get transaction type from user
             Transaction new_transaction(tun, curr, data, transaction_type);
             transaction_data.push_back(new_transaction);
@@ -387,6 +387,8 @@ int main() {
     CryptoPP::RSA::PrivateKey privateKey;
     generateRSAKeys(publicKey, privateKey);
 
+// tun int
+    long long int transaction_id = 6236423672646472;
 
     std::string card_number, expiry_date;
     int cvv;
@@ -421,7 +423,7 @@ int main() {
     std::cout << "=================================================" << std::endl;
    
     std::cout << "Your transaction information is" << std::endl;
-    myTerminal.add_transaction(56236423672646472821, "USD", "Store Purchase");
+    myTerminal.add_transaction(transaction_id, "USD", "Store Purchase");
     std::cout << "=================================================" << std::endl;
     myTerminal.display_transactions();
     std::cout << "=================================================" << std::endl;
