@@ -16,7 +16,6 @@ namespace fs = std::filesystem;
 
 class UserData{ /// changes include replacing C type arras to more secure cpp ones
     public:
-    
     UserData(const std::string& firstName, const std::string& lastName, double balance, const std::string& address, const std::string& currency)
              : fname(firstName), lname(lastName), balance(balance), address(address), location_currency(currency) {}
     void DisplayUserInfo() const{
@@ -63,13 +62,9 @@ class UserData{ /// changes include replacing C type arras to more secure cpp on
         }
         return last_acc_num;
     }
-};
-    
-///maybe do getter class
+};   
 // card dummy
-
 class Card { // const kept, even in private for greater security.
-
 private:
     const std::string card_number;
     const int cvv;
@@ -132,8 +127,6 @@ return (sum % 10 == 0);
 
      return "Invalid Card Type"; //else invalid card
 }
-
-
 public:
     Card(const std::string &in_card_number, const int &in_cvv, const std::string &in_exp_date) 
         : card_number(in_card_number), cvv(in_cvv), exp_date(in_exp_date) {
@@ -180,7 +173,6 @@ public:
         std::cout << "Card Number is INVALID!" << std::endl;
     }
 }
-
 };
 
 class bank {
@@ -267,6 +259,70 @@ class bank {
             //bank(const std::string& );
 };
 
+class terminal {
+    private:
+        // Transaction struct to store details
+        struct Transaction {
+            int TUN;  // Transaction unique number
+            std::string currency;
+            std::string data;  // Transaction data
+            std::string transaction_type;  // "Contactless" or "Contact"
+
+            // Constructor
+            Transaction(int tun, const std::string& curr, const std::string& d, const std::string& t_type)
+                : TUN(tun), currency(curr), data(d), transaction_type(t_type) {}
+        };
+
+        // List to hold all transactions
+        std::list<Transaction> transaction_data;
+
+    public:
+        // Constructor
+        terminal() {
+            // Perform initialization if necessary
+        }
+
+        // Add a transaction (with user input for transaction type: "Contactless" or "Contact")
+        void add_transaction(int tun, const std::string& curr, const std::string& data) {
+            std::string transaction_type = selectTransactionType();  // Get transaction type from user
+            Transaction new_transaction(tun, curr, data, transaction_type);
+            transaction_data.push_back(new_transaction);
+        }
+
+        // Display all transactions
+        void display_transactions() const {
+            for (const auto& trans : transaction_data) {
+                std::cout << "TUN: " << trans.TUN
+                        << ", Currency: " << trans.currency
+                        << ", Transaction location: " << trans.data
+                        << ", Transaction Type: " << trans.transaction_type
+                        << std::endl;
+            }
+        }
+
+        // Function to select transaction type ("Contactless" or "Contact")
+        std::string selectTransactionType() {
+            int transactionType;
+            std::cout << " Choose 1 for Contactless or 2 for Contact: ";
+
+            while (true) {
+                std::cin >> transactionType;
+
+                // Check if the input is valid
+                if (std::cin.fail() || (transactionType != 1 && transactionType != 2)) {
+                    std::cin.clear();  // Clear the error flag on cin
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');  // Ignore invalid input
+                    std::cout << "Invalid input. Please enter 1 for Contactless or 2 for Contact: ";
+                } else {
+                    break;
+                }
+            }
+
+            // Return the transaction type as a string
+            return (transactionType == 1) ? "Contactless" : "Contact";
+        }
+};
+
 
 
 
@@ -297,6 +353,9 @@ std::string decryptCardNumber(const std::string &cipher, CryptoPP::RSA::PrivateK
 }
 
 void inputCardDetails(std::string& cardNumber, int &cvv, std::string& expiryDate) {
+    std::cout << "=================================================" << std::endl;
+    std::cout << "Please input your card details" << std::endl;
+    std::cout << "=================================================" << std::endl;
     std::cout << "Input Card Number: ";
     std::cin >> cardNumber;
 
@@ -305,41 +364,27 @@ void inputCardDetails(std::string& cardNumber, int &cvv, std::string& expiryDate
 
     std::cout << "Input Expiry Date (MM/YY): ";
     std::cin >> expiryDate;
+    std::cout << "=================================================" << std::endl;
+    std::cout << "===================Thanks========================" << std::endl;
+    std::cout << "=================================================" << std::endl;
+
 }
 
 /// RSA finished.
 
-// PaymenyMethod
-void selectPaymentMethod() {
-    int paymentMethod;
-    std::cout << "Hi, customer. What type of method would you like to use? Choose by pressing 1 [contact] or 0 [contactless]: ";
-
-    while (true) {
-        std::cin >> paymentMethod;
-
-        if (std::cin.fail() || (paymentMethod != 0 && paymentMethod != 1)) {
-            std::cin.clear(); 
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
-            std::cout << "Invalid input. Please enter 1 or 0: ";
-        } else {
-            break;
-        }
-    }
-
-    std::cout << "Your selected payment method is: " << (paymentMethod == 1 ? "Contact" : "Contactless") << std::endl;
-}
-// Payment method end. 
 
 int main() {
-
+    terminal myTerminal;
     bank myBank;
-
+    UserData myUser("John", "Doe", 100.0, "123 Elm Street", "USD");
     CryptoPP::RSA::PublicKey publicKey;
     CryptoPP::RSA::PrivateKey privateKey;
     generateRSAKeys(publicKey, privateKey);
 
+
     std::string card_number, expiry_date;
     int cvv;
+
     inputCardDetails(card_number, cvv, expiry_date);
 
     try {
@@ -349,26 +394,35 @@ int main() {
         std::cout << e.what() << std::endl;
         return 1;
     }
-
-    UserData user("Bob", "Star", 120.0, "11 Park Avenue, Switzerland", "CHF");
-    user.DisplayUserInfo();
-
-    selectPaymentMethod();
-
     
-    
-    
+    // Prints:
+    std::cout << "=================================================" << std::endl;
+    std::cout << "User data is:" << std::endl;
+    std::cout << "=================================================" << std::endl;
+    myUser.DisplayUserInfo();
+    std::cout << "=================================================" << std::endl;
+
+    /// transaction data:
+
+    std::cout << "=================================================" << std::endl;
     std::string encryptedCardNumber = encryptCardNumber(card_number, publicKey);
     std::cout << " Encrypted Card Number: " << encryptedCardNumber << std::endl;
-
+    std::cout << "=================================================" << std::endl;
     std::string decryptedCardNumber = decryptCardNumber(encryptedCardNumber, privateKey);
     std::cout << " Decrypted Card Number: " << decryptedCardNumber << std::endl;
-
-
+    std::cout << "=================================================" << std::endl;
+   
+    std::cout << "Your transaction information is" << std::endl;
+    myTerminal.add_transaction(1, "USD", "Store Purchase");
+    std::cout << "=================================================" << std::endl;
+    myTerminal.display_transactions();
+    std::cout << "=================================================" << std::endl;
     std::cout << " Compiled successfully!" << std::endl;
-
-    std::cout <<"Your keys are" << std::endl;
+    std::cout << "=================================================" << std::endl;
+    std::cout <<" The banks keys are" << std::endl;
+    std::cout << "=================================================" << std::endl;
     myBank.printKeys(); 
     std::cout <<  std::endl;
+     std::cout << "=================================================" << std::endl;
     return 0;
 }
