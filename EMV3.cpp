@@ -16,10 +16,12 @@ namespace fs = std::filesystem;
 
 class UserData{ /// changes include replacing C type arras to more secure cpp ones
     public:
-    UserData(const std::string& firstName, const std::string& lastName, double balance, const std::string& address, const std::string& currency)
-             : fname(firstName), lname(lastName), balance(balance), address(address), location_currency(currency) {}
+    UserData(const std::string& firstName, const std::string& lastName, const std::string& address)
+             : fname(firstName), lname(lastName), address(address) {
+                acc_num=getLastRowOfColumn()+1;
+             }
     void DisplayUserInfo() const{
-        std::cout << fname << " " << lname << " " << " has " <<  balance << "  " << location_currency << " residing at " << address << std::endl;
+        std::cout << fname << " " << lname << " residing at " << address << std::endl;
     }
 
     // CSV initialisation
@@ -29,15 +31,13 @@ class UserData{ /// changes include replacing C type arras to more secure cpp on
             file << "Account Number,First Name,Last Name,Balance,Address,Currency\n";  // Add headers
         }
         std::ofstream file(filename, std::ios::app);  // Append to the file
-        file << acc_num << "," << fname << "," << lname << "," << balance << "," << address << "," << location_currency << "\n";
+       file << acc_num << "," << fname << "," << lname << "," << address << "\n";
     }
 
     private: // private for user security.
     std::string fname;
-    std::string lname;
-    double balance; 
+    std::string lname; 
     std::string address;
-    std::string location_currency;
     // data for account number: 
     int acc_num{};  // Declare acc_num here
     const std::string filename = "userdata.csv";
@@ -69,6 +69,12 @@ private:
     const std::string card_number;
     const int cvv;
     const std::string exp_date;
+     double balance;
+    std::string currency;
+    const int account_nb;
+    int pin;
+    std::string password;
+    std::string token;
     // Constructor to initialize the card number
     
     void GetCurrentMonthYear(int &currentmonth, int &currentyear) const{
@@ -128,8 +134,8 @@ return (sum % 10 == 0);
      return "Invalid Card Type"; //else invalid card
 }
 public:
-    Card(const std::string &in_card_number, const int &in_cvv, const std::string &in_exp_date) 
-        : card_number(in_card_number), cvv(in_cvv), exp_date(in_exp_date) {
+    Card(const std::string &in_card_number, const int &in_cvv, const std::string &in_exp_date, const std::string & in_currency, const int &in_account_nb) 
+        : card_number(in_card_number), cvv(in_cvv), exp_date(in_exp_date), currency(in_currency), account_nb(in_account_nb) {
         if (cvv < 100 || cvv > 999){  // check length using three digits.
             throw std::invalid_argument("CVV code is incorrect"); // error if ccv is incorrect
         }
@@ -238,7 +244,7 @@ class bank {
 
             double balance = 0;
 
-            UserData customer(fname, lname, balance, address, currency);
+            UserData customer(fname, lname, address);
             customer.SaveToCSV();
             customer.DisplayUserInfo();
         }
@@ -376,7 +382,7 @@ void inputCardDetails(std::string& cardNumber, int &cvv, std::string& expiryDate
 int main() {
     terminal myTerminal;
     bank myBank;
-    UserData myUser("John", "Doe", 100.0, "123 Elm Street", "USD");
+    UserData myUser("Bob", "Star", "11 Park Avenue, Switzerland");
     CryptoPP::RSA::PublicKey publicKey;
     CryptoPP::RSA::PrivateKey privateKey;
     generateRSAKeys(publicKey, privateKey);
@@ -384,11 +390,14 @@ int main() {
 
     std::string card_number, expiry_date;
     int cvv;
+    double balance;
+    std::string currency;
+    int account_nb;
 
     inputCardDetails(card_number, cvv, expiry_date);
 
     try {
-        Card card(card_number, cvv, expiry_date);
+        Card card(card_number, cvv, expiry_date, currency, account_nb);
         card.check();
     } catch (const std::exception& e) {
         std::cout << e.what() << std::endl;
