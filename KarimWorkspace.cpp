@@ -77,6 +77,11 @@ private:
     const std::string exp_date;
     double balance;
     std::string currency;
+    const int account_nb;
+    int pin;
+    std::string password;
+    std::string token;
+    //authentication method: PIN, Password, Token (mobile app)
     // Constructor to initialize the card number
     
     void GetCurrentMonthYear(int &currentmonth, int &currentyear) const{
@@ -138,8 +143,8 @@ return (sum % 10 == 0);
 
 
 public:
-    Card(const std::string &in_card_number, const int &in_cvv, const std::string &in_exp_date, double in_balance, const std::string & in_currency) 
-        : card_number(in_card_number), cvv(in_cvv), exp_date(in_exp_date), balance(in_balance), currency(in_currency) {
+    Card(const std::string &in_card_number, const int &in_cvv, const std::string &in_exp_date, const std::string & in_currency, const int &in_account_nb) 
+        : card_number(in_card_number), cvv(in_cvv), exp_date(in_exp_date), currency(in_currency), account_nb(in_account_nb){
         if (cvv < 100 || cvv > 999){  // check length using three digits.
             throw std::invalid_argument("CVV code is incorrect"); // error if ccv is incorrect
         }
@@ -232,10 +237,27 @@ public:
     
     //public:
         //bank(const std::string& );
+
 };
 
 
+/*
 
+IN TERMINAL 
+
+bool validatePIN(const int &inputPIN) const{
+    return pin == inputPIN;
+    }
+
+    bool validatePassword(const std::string &inputPassword) const{
+        return password == inputPassword;
+    }
+
+    bool validateToken(const std::string &inputToken) const{
+        return token == inputToken;
+    }
+
+*/
 
 
 /// RSA ALGORITHM START
@@ -306,10 +328,11 @@ int main() {
     int cvv;
     double balance;
     std::string currency;
+    int account_nb;
     inputCardDetails(card_number, cvv, expiry_date);
 
     try {
-        Card card(card_number, cvv, expiry_date, balance, currency);
+        Card card(card_number, cvv, expiry_date, currency, account_nb);
         card.check();
     } catch (const std::exception& e) {
         std::cout << e.what() << std::endl;
