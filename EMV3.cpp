@@ -2,6 +2,8 @@
 #include <string>
 #include <ctime>
 #include <limits>
+#include <chrono>
+#include <thread>
 #include <cstring>
 #include <sstream>
 #include "cryptopp/rsa.h"
@@ -12,7 +14,15 @@
 #include "cryptopp/filters.h"
 #include <filesystem>  // Use standard filesystem for C++17
 namespace fs = std::filesystem;
-
+//// Global constant:
+const int MAX_ATTEMPTS = 3;
+const std::string ERROR_MESSAGE = "Authentication failed 3 times. Payment failed.";
+const std::string SUCCESS_MESSAGE = "Authentication successful! Proceeding with payment.";
+// clear input buffer;
+void ClearInputBuffer() {
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+}
 
 class UserData{ /// changes include replacing C type arras to more secure cpp ones
     public:
@@ -23,25 +33,58 @@ class UserData{ /// changes include replacing C type arras to more secure cpp on
     void DisplayUserInfo() const{
         std::cout << fname << " " << lname << " residing at " << address << std::endl;
     }
-
-    // CSV initialisation
-    void SaveToCSV() const {
-        if (!fs::exists(filename)) {  // Using experimental filesystem
-            std::ofstream file(filename, std::ios::out);
-            file << "Account Number,First Name,Last Name,Balance,Address,Currency\n";  // Add headers
+    std::string GetAuthenticationChoice() const {
+        int choice;
+        std::cout << "Choose your transaction authentication method: press 1 for PIN, 2 for Password, and 3 for TOKEN: ";
+        while (true) {
+            std::cin >> choice;
+            if (std::cin.fail() || (choice != 1 && choice != 2 && choice != 3)) {
+                ClearInputBuffer();
+                std::cout << "Invalid input. Please press 1 for PIN, 2 for Password, and 3 for TOKEN: ";
+            } else {
+                break;
+            }
         }
-        std::ofstream file(filename, std::ios::app);  // Append to the file
-       file << acc_num << "," << fname << "," << lname << "," << address << "\n";
+        ClearInputBuffer();  // Clear buffer after a valid selection
+        switch (choice) {
+            case 1: return "PIN";
+            case 2: return "Password";
+            case 3: return "TOKEN";
+            default: return "";  // This should never happen
+        }
+    }
+
+    // Function to get the PIN from the user
+    int GetPIN() const {
+        int pin;
+        std::cout << "Enter your PIN: ";
+        std::cin >> pin;
+        ClearInputBuffer();
+        return pin;
+    }
+
+    // Function to get the Password from the user
+    std::string GetPassword() const {
+        std::string password;
+        std::cout << "Enter your Password: ";
+        std::getline(std::cin, password);
+        return password;
+    }
+
+    // Function to get the Token from the user
+    std::string GetToken() const {
+        std::string token;
+        std::cout << "Enter your Token: ";
+        std::getline(std::cin, token);
+        return token;
     }
 
     private: // private for user security.
     std::string fname;
     std::string lname; 
     std::string address;
-    // data for account number: 
     int acc_num{};  // Declare acc_num here
     const std::string filename = "userdata.csv";
-    
     int getLastRowOfColumn() {
         std::ifstream file(filename);
         std::string line;
@@ -62,14 +105,14 @@ class UserData{ /// changes include replacing C type arras to more secure cpp on
         }
         return last_acc_num;
     }
-};   
+};
 // card dummy
 class Card { // const kept, even in private for greater security.
 private:
     const std::string card_number;
     const int cvv;
     const std::string exp_date;
-    double balance;
+     double balance;
     std::string currency;
     const int account_nb;
     int pin;
@@ -185,9 +228,59 @@ class bank {
     private:
         CryptoPP::RSA::PublicKey publicKey;
         CryptoPP::RSA::PrivateKey privateKey;
-
+        const int correctPin = 1234;                 // Correct PIN (in a real app, these values would be securely stored)
+        const std::string correctPassword = "Password123";
+        const std::string correctToken = "Token123";
     public:
+        // validators:
 
+        bool ValidatePIN(int userPin) const {
+        return userPin == correctPin;
+    }
+
+    // Function to validate Password
+    bool ValidatePassword(const std::string& userPassword) const {
+        return userPassword == correctPassword;
+    }
+
+    // Function to validate Token
+    bool ValidateToken(const std::string& userToken) const {
+        return userToken == correctToken;
+    }
+
+    // Function to handle the overall authentication process
+    bool Authenticate(const std::string& method, const UserData& user) {
+        int attempts = 0;
+        while (attempts < MAX_ATTEMPTS) {
+            attempts++;
+            bool success = false;
+
+            if (method == "PIN") {
+                int userPin = user.GetPIN();
+                success = ValidatePIN(userPin);
+            } else if (method == "Password") {
+                std::string userPassword = user.GetPassword();
+                success = ValidatePassword(userPassword);
+            } else if (method == "TOKEN") {
+                std::string userToken = user.GetToken();
+                success = ValidateToken(userToken);
+            }
+
+            if (success) {
+                std::cout << SUCCESS_MESSAGE << std::endl;
+                return true;
+            } else {
+                std::cout << "Authentication failed." << std::endl;
+            }
+
+            if (attempts < MAX_ATTEMPTS) {
+                std::cout << "Please try again. You have " << MAX_ATTEMPTS - attempts << " attempt(s) remaining.\n";
+            }
+        }
+
+        std::cout << ERROR_MESSAGE << std::endl;
+        return false;
+    }
         bank (){
             generateRSAKeys();
         }
@@ -245,7 +338,7 @@ class bank {
             double balance = 0;
 
             UserData customer(fname, lname, address);
-            customer.SaveToCSV();
+            //customer.SaveToCSV();
             customer.DisplayUserInfo();
         }
         /*
@@ -267,7 +360,8 @@ class bank {
 
 class terminal {
     private:
-        // Transaction struct to store details
+   
+    // Transaction struct to store details
         struct Transaction {
             long long int TUN;  // Transaction unique number
             std::string currency;
@@ -305,7 +399,6 @@ class terminal {
                         << std::endl;
             }
         }
-
         // Function to select transaction type ("Contactless" or "Contact")
         std::string selectTransactionType() {
             int transactionType;
@@ -411,9 +504,7 @@ int main() {
     std::cout << "User data is:" << std::endl;
     myUser.DisplayUserInfo();
     std::cout << "=================================================" << std::endl;
-
     /// transaction data:
-
     std::cout << "=================================================" << std::endl;
     std::string encryptedCardNumber = encryptCardNumber(card_number, publicKey);
     std::cout << " Encrypted Card Number: " << encryptedCardNumber << std::endl;
@@ -421,7 +512,16 @@ int main() {
     std::string decryptedCardNumber = decryptCardNumber(encryptedCardNumber, privateKey);
     std::cout << " Decrypted Card Number: " << decryptedCardNumber << std::endl;
     std::cout << "=================================================" << std::endl;
-   
+   /// now athentication method
+    std::string authMethod = myUser.GetAuthenticationChoice();
+    bool isAuthenticated = myBank.Authenticate(authMethod, myUser);
+        if (isAuthenticated) {
+            std::cout << "Payment successful!" << std::endl;
+        } else {
+            std::cout << "Too many failed attempts. Please try again later.\n";
+            std::this_thread::sleep_for(std::chrono::seconds(5));  // Simulate lockout
+        }
+
     std::cout << "Your transaction information is" << std::endl;
     myTerminal.add_transaction(transaction_id, "USD", "Store Purchase");
     std::cout << "=================================================" << std::endl;
