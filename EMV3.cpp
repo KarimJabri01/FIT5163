@@ -313,7 +313,9 @@ class bank {
         std::string encodedPublicKey = encodeKeyToBase64(publicKey);
         std::string encodedPrivateKey = encodeKeyToBase64(privateKey);
 
+        
         std::cout << "Public Key (Base64 Encoded): \n" << encodedPublicKey << "\n";
+        std::cout <<"==================================================" << std::endl;
         std::cout << "Private Key (Base64 Encoded): \n" << encodedPrivateKey << "\n";
     }
 
@@ -392,11 +394,9 @@ class terminal {
         // Display all transactions
         void display_transactions() const {
             for (const auto& trans : transaction_data) {
-                std::cout << "TUN: " << trans.TUN
-                        << ", Currency: " << trans.currency
-                        << ", Transaction location: " << trans.data
-                        << ", Transaction Type: " << trans.transaction_type
-                        << std::endl;
+                std::cout << "=================================================" << std::endl;
+                std::cout << "=========Your transaction information is :=======" << std::endl;
+                std::cout << "TUN: " << trans.TUN << ", Currency: " << trans.currency << ", Transaction location: " << trans.data << ", Transaction Type: " << trans.transaction_type << std::endl;
             }
         }
         // Function to select transaction type ("Contactless" or "Contact")
@@ -488,9 +488,17 @@ int main() {
     double balance;
     std::string currency;
     int account_nb;
+    
 
+    std::cout << "=================================================" << std::endl;
+    std::cout << "======Please Select Your payment method==========" << std::endl;
+    std::cout << "=================================================" << std::endl;
+
+    myTerminal.add_transaction(transaction_id, "USD", "Store Purchase"); 
+
+    std::cout << "=================================================" << std::endl;
+    std::string authMethod = myUser.GetAuthenticationChoice();
     inputCardDetails(card_number, cvv, expiry_date);
-
     try {
         Card card(card_number, cvv, expiry_date, currency, account_nb);
         card.check();
@@ -498,14 +506,13 @@ int main() {
         std::cout << e.what() << std::endl;
         return 1;
     }
-    
     // Prints:
     std::cout << "=================================================" << std::endl;
-    std::cout << "User data is:" << std::endl;
-    myUser.DisplayUserInfo();
+    std::cout << "User data is: " << std::endl;
+    myUser.DisplayUserInfo(); // shows information about the user.
+    myTerminal.display_transactions();    /// shows TUN and info.
     std::cout << "=================================================" << std::endl;
     /// transaction data:
-    std::cout << "=================================================" << std::endl;
     std::string encryptedCardNumber = encryptCardNumber(card_number, publicKey);
     std::cout << " Encrypted Card Number: " << encryptedCardNumber << std::endl;
     std::cout << "=================================================" << std::endl;
@@ -513,7 +520,8 @@ int main() {
     std::cout << " Decrypted Card Number: " << decryptedCardNumber << std::endl;
     std::cout << "=================================================" << std::endl;
    /// now athentication method
-    std::string authMethod = myUser.GetAuthenticationChoice();
+    
+    
     bool isAuthenticated = myBank.Authenticate(authMethod, myUser);
         if (isAuthenticated) {
             std::cout << "Payment successful!" << std::endl;
@@ -522,17 +530,12 @@ int main() {
             std::this_thread::sleep_for(std::chrono::seconds(5));  // Simulate lockout
         }
 
-    std::cout << "Your transaction information is" << std::endl;
-    myTerminal.add_transaction(transaction_id, "USD", "Store Purchase");
-    std::cout << "=================================================" << std::endl;
-    myTerminal.display_transactions();
     std::cout << "=================================================" << std::endl;
     std::cout << " Compiled successfully!" << std::endl;
     std::cout << "=================================================" << std::endl;
     std::cout <<" The banks keys are" << std::endl;
-    std::cout << "=================================================" << std::endl;
+    std::cout <<"==================================================" << std::endl;
     myBank.printKeys(); 
-    std::cout <<  std::endl;
-     std::cout << "=================================================" << std::endl;
+    std::cout <<"==================================================" << std::endl;
     return 0;
 }
