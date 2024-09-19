@@ -398,7 +398,6 @@ int main() {
     // Prints:
     std::cout << "=================================================" << std::endl;
     std::cout << "User data is:" << std::endl;
-    std::cout << "=================================================" << std::endl;
     myUser.DisplayUserInfo();
     std::cout << "=================================================" << std::endl;
 
