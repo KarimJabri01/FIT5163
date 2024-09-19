@@ -185,9 +185,9 @@ public:
 
 class bank {
 private:
-    std::string &pk;
-    generate
-    std::string &sk;
+   //std::string &pk;
+   // generate
+   // std::string &sk;
 
 public:
     void CreatUser() {
