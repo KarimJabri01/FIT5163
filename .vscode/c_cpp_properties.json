@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}",
-                "C:/Users/Ben108/AppData/Local/Programs/MySys2/mingw64/include/cryptopp"
+                "C:/msys64/mingw64/include"
             ],
             "defines": [
                 "_DEBUG",
@@ -15,7 +15,7 @@
             "cStandard": "c23",
             "cppStandard": "c++23",
             "intelliSenseMode": "windows-clang-x64",
-            "compilerPath": "C:/Users/Ben108/AppData/Local/Programs/MySys2/ucrt64/bin/g++.exe"
+            "compilerPath": "C:/msys64/ucrt64/bin"
         }
     ],
     "version": 4
