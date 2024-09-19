@@ -184,50 +184,87 @@ public:
 };
 
 class bank {
-private:
-   //std::string &pk;
-   // generate
-   // std::string &sk;
+    private:
+        CryptoPP::RSA::PublicKey publicKey;
+        CryptoPP::RSA::PrivateKey privateKey;
 
-public:
-    void CreatUser() {
-        std::string fname;
-        std::cout << "Enter first name: " << std::endl;
-        std::cin >> fname;
+    public:
 
-        std::string lname;
-        std::cout << "Enter last name: " << std::endl;
-        std::cin >> lname;
+        bank (){
+            generateRSAKeys();
+        }
 
-        std::string currency;
-        std::cout << "Enter currency: " << std::endl;
-        std::cin >> currency;
-
-        std::string address;
-        std::cout << "Enter address: " << std::endl;
-        std::cin >> address;
-
-        double balance = 0;
-
-        UserData customer(fname, lname, balance, address, currency);
-        customer.SaveToCSV();
-        customer.DisplayUserInfo();
+        void generateRSAKeys() {
+        CryptoPP::AutoSeededRandomPool rng;
+        privateKey.GenerateRandomWithKeySize(rng, 2048);
+        publicKey.AssignFrom(privateKey);
     }
-    /*
-    read and write the data from csv file (geters and setters)
-    fetch the data
-    bank should call encryption and decryption functions
-    then check the functions
-    respond to terminal  
-    hash function that hash the passowords in the terminal and the bank 
-    compare the hash values inside the terminal 
-    
-    private key only for the bank and public key for everyone
-    */
-    
-    
-    //public:
-        //bank(const std::string& );
+
+    // Helper function to encode a key to a string (Base64)
+    std::string encodeKeyToBase64(const CryptoPP::RSA::PublicKey& key) {
+        std::string encoded;
+        CryptoPP::Base64Encoder encoder(new CryptoPP::StringSink(encoded));
+        key.DEREncode(encoder); // DER encoding of the key
+        encoder.MessageEnd();
+        return encoded;
+    }
+
+    std::string encodeKeyToBase64(const CryptoPP::RSA::PrivateKey& key) {
+        std::string encoded;
+        CryptoPP::Base64Encoder encoder(new CryptoPP::StringSink(encoded));
+        key.DEREncode(encoder); // DER encoding of the key
+        encoder.MessageEnd();
+        return encoded;
+    }
+
+    // Print the public and private keys in Base64 encoded form
+    void printKeys() {
+        std::string encodedPublicKey = encodeKeyToBase64(publicKey);
+        std::string encodedPrivateKey = encodeKeyToBase64(privateKey);
+
+        std::cout << "Public Key (Base64 Encoded): \n" << encodedPublicKey << "\n";
+        std::cout << "Private Key (Base64 Encoded): \n" << encodedPrivateKey << "\n";
+    }
+
+
+        void CreatUser() {
+            std::string fname;
+            std::cout << "Enter first name: " << std::endl;
+            std::cin >> fname;
+
+            std::string lname;
+            std::cout << "Enter last name: " << std::endl;
+            std::cin >> lname;
+
+            std::string currency;
+            std::cout << "Enter currency: " << std::endl;
+            std::cin >> currency;
+
+            std::string address;
+            std::cout << "Enter address: " << std::endl;
+            std::cin >> address;
+
+            double balance = 0;
+
+            UserData customer(fname, lname, balance, address, currency);
+            customer.SaveToCSV();
+            customer.DisplayUserInfo();
+        }
+        /*
+        read and write the data from csv file (geters and setters) x
+        fetch the data x
+        bank should call encryption and decryption functions
+        then check the functions
+        respond to terminal  
+        hash function that hash the passowords in the terminal and the bank 
+        compare the hash values inside the terminal 
+        
+        private key only for the bank and public key for everyone
+        */
+        
+        
+        //public:
+            //bank(const std::string& );
 };
 
 
@@ -294,6 +331,9 @@ void selectPaymentMethod() {
 // Payment method end. 
 
 int main() {
+
+    bank myBank;
+
     CryptoPP::RSA::PublicKey publicKey;
     CryptoPP::RSA::PrivateKey privateKey;
     generateRSAKeys(publicKey, privateKey);
@@ -315,13 +355,20 @@ int main() {
 
     selectPaymentMethod();
 
+    
+    
+    
     std::string encryptedCardNumber = encryptCardNumber(card_number, publicKey);
-    std::cout << "Encrypted Card Number: " << encryptedCardNumber << std::endl;
+    std::cout << " Encrypted Card Number: " << encryptedCardNumber << std::endl;
 
     std::string decryptedCardNumber = decryptCardNumber(encryptedCardNumber, privateKey);
-    std::cout << "Decrypted Card Number: " << decryptedCardNumber << std::endl;
+    std::cout << " Decrypted Card Number: " << decryptedCardNumber << std::endl;
 
 
-    std::cout << "Compiled successfully!" << std::endl;
+    std::cout << " Compiled successfully!" << std::endl;
+
+    std::cout <<"Your keys are" << std::endl;
+    myBank.printKeys(); 
+    std::cout <<  std::endl;
     return 0;
 }
