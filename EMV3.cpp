@@ -421,7 +421,7 @@ int main() {
     std::cout << "=================================================" << std::endl;
    
     std::cout << "Your transaction information is" << std::endl;
-    myTerminal.add_transaction(1, "USD", "Store Purchase");
+    myTerminal.add_transaction(56236423672646472821, "USD", "Store Purchase");
     std::cout << "=================================================" << std::endl;
     myTerminal.display_transactions();
     std::cout << "=================================================" << std::endl;
