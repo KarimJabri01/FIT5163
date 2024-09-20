@@ -12,6 +12,8 @@
 #include "cryptopp/base64.h"
 #include "cryptopp/files.h"
 #include "cryptopp/filters.h"
+#include "cryptopp/aes.h"
+#include "cryptopp/modes.h"
 #include <filesystem>  // Use standard filesystem for C++17
 namespace fs = std::filesystem;
 //// Global constant:
@@ -112,12 +114,30 @@ private:
     const std::string card_number;
     const int cvv;
     const std::string exp_date;
-     double balance;
+    double balance;
     std::string currency;
     const int account_nb;
     int pin;
     std::string password;
     std::string token;
+    bool validate=false;
+
+    enum AuthMethod{
+        PIN,
+        PASSWORD,
+        TOKEN
+    };
+    AuthMethod auth_meth;
+
+
+    // Masking Function:
+
+    std::string getMaskedCardNumber() const{
+        if (card_number.length()<4){
+            return std::string(card_number.length(), '*');
+        }
+        return std::string(card_number.length()-4, '*') + card_number.substr(card_number.length()-4);
+    }
     // Constructor to initialize the card number
     
     void GetCurrentMonthYear(int &currentmonth, int &currentyear) const{
@@ -131,6 +151,27 @@ private:
         int currentmonth, currentyear; // access time in format.
         GetCurrentMonthYear(currentmonth, currentyear);
         return (expyear < currentyear) || (expyear == currentyear && expmonth == currentmonth); // backchecks if dates match.
+    }
+
+    //Validate CVV
+
+    void validateCVV(int cvv) const{
+        if(cvv < 100 || cvv > 999){
+            throw std::invalid_argument("CVV code is incorrect");
+        }
+    }
+
+
+    //Validate Experation Date
+
+    void validateExperationDate(const std::string &exp_date) const{
+        std::stringstream ss(exp_date);
+        int expiry_month, expiry_year;
+        char delimiter;
+        ss>>expiry_month>>delimiter>>expiry_year;
+        if (IsCardExpired(expiry_month, expiry_year)){
+            throw std::runtime_error("Your card is expired");
+        }
     }
  ///luhn greater strcture and comments. + Log (n) better results. 
     bool ValidatedLuhn() const {
@@ -175,6 +216,10 @@ private:
         }
 
         return "Invalid Card Type"; //else invalid card
+
+        std::string auth_meth; // 1,2,3
+        std::string authenticator;
+            //if (auth_meth == 1) --> PIN, == 2 --> password, == 3 --> token
     }
 public:
     Card(const std::string &in_card_number, const int &in_cvv, const std::string &in_exp_date, const std::string & in_currency, const int &in_account_nb) 
@@ -222,6 +267,26 @@ public:
             std::cout << "Card Number is INVALID!" << std::endl;
         }
     }
+
+    // Card Getter functions
+    std::string getCardNumber() const {
+        return card_number;
+    }
+    std::string getAccountNb() const {
+        return std::to_string(account_nb);
+    }
+    std::string getCVV() const {
+        return std::to_string(cvv);
+    }
+    std::string getExpDate() const {
+        return exp_date;
+    }
+    std::string getCurrency() const {
+        return currency;
+    }
+    std::string getBalance() const {
+        return std::to_string(balance);
+    }
 };
 
 class bank {
@@ -234,7 +299,7 @@ class bank {
     public:
         // validators:
 
-        bool ValidatePIN(int userPin) const {
+    bool ValidatePIN(int userPin) const {
         return userPin == correctPin;
     }
 
@@ -320,29 +385,122 @@ class bank {
     }
 
 
-        void CreatUser() {
-            std::string fname;
-            std::cout << "Enter first name: " << std::endl;
-            std::cin >> fname;
+    void CreatUser() {
+        std::string fname;
+        std::cout << "Enter first name: " << std::endl;
+        std::cin >> fname;
 
-            std::string lname;
-            std::cout << "Enter last name: " << std::endl;
-            std::cin >> lname;
+        std::string lname;
+        std::cout << "Enter last name: " << std::endl;
+        std::cin >> lname;
 
-            std::string currency;
-            std::cout << "Enter currency: " << std::endl;
-            std::cin >> currency;
+        std::string currency;
+        std::cout << "Enter currency: " << std::endl;
+        std::cin >> currency;
 
-            std::string address;
-            std::cout << "Enter address: " << std::endl;
-            std::cin >> address;
+        std::string address;
+        std::cout << "Enter address: " << std::endl;
+        std::cin >> address;
 
-            double balance = 0;
+        double balance = 0;
 
-            UserData customer(fname, lname, address);
-            //customer.SaveToCSV();
-            customer.DisplayUserInfo();
+        UserData customer(fname, lname, address);
+        //customer.SaveToCSV();
+        customer.DisplayUserInfo();
+    }
+
+    std::string balanceChange(const std::string card_number, double cost) {
+        std::string filename = "card_data.csv";
+        std::ifstream file_in(filename);
+        if (!file_in.is_open()) {
+            std::cerr << "Erroring opening file!" << std::endl;
         }
+
+        std::vector<std::string> file_content;
+        std::string line;
+        bool found = false;
+        
+        while (getline(file_in, line)) {
+            std::vector<std::string> values = split(line, ',');
+
+            if (values.size() > 1 && values[0] == card_number) {
+                found = true;
+                double balance = std::stoi(values[5]);
+                if (balance <= cost) {
+                    return "There is not enough money in the card!";
+                }
+                else {
+                    values[5] = balance - cost; 
+                }
+            }
+
+            file_content.push_back(join(values, ','));
+        }
+
+        file_in.close();
+
+        if (!found) {
+            return "Card number not valid.";
+        }
+
+        std::ofstream file_out(filename, std::ios::trunc);
+        if (!file_out.is_open()) {
+            std::cerr << "Error opening file to write!" << std::endl;
+        }
+
+        for (const auto& line : file_content) {
+            file_out << line << "\n";
+        }
+
+        file_out.close();
+
+        return "Transaction was successful";
+    }
+
+
+    bool checkCardDetail(const Card& card) {
+        std::string filename = "card_data.csv";
+        std::ifstream file_in(filename);
+        if (!file_in.is_open()) {
+            std::cerr << "Erroring opening file!" << std::endl;
+        }
+
+        std::vector<std::string> file_content;
+        std::string line;
+        bool found = false;
+        
+        while (getline(file_in, line)) {
+            std::vector<std::string> values = split(line, ',');
+            if (values[0] == card.getCardNumber() && values[1] == card.getAccountNb() && values[2] == card.getCVV() &&
+                values[3] == card.getExpDate() && values[4] == card.getCurrency()) {
+                found = true;
+                break;
+            }
+        }
+        return found;
+    }
+
+    std::vector<std::string> split(const std::string& line, char delimiter) {
+        std::vector<std::string> values;
+        std::string value;
+        std::stringstream ss(line);
+        
+        while (getline(ss, value, delimiter)) {
+            values.push_back(value);
+        }
+        
+        return values;
+    }
+
+    std::string join(const std::vector<std::string>& values, char delimiter) {
+        std::string result;
+        for (size_t i = 0; i < values.size(); ++i) {
+            if (i != 0) result += delimiter;
+            result += values[i];
+        }
+
+        return result;
+    }
         /*
         read and write the data from csv file (geters and setters) x
         fetch the data x
@@ -471,6 +629,27 @@ void inputCardDetails(std::string& cardNumber, int &cvv, std::string& expiryDate
 
 /// RSA finished.
 
+//AES Encryption Function
+
+std::string encryptValue(const std::string &plaintext, const CryptoPP::SecByteBlock &key, const CryptoPP::SecByteBlock &iv){
+    std::string cipher;
+    CryptoPP::AES::Encryption aesEncryption(key, CryptoPP::AES::DEFAULT_KEYLENGTH);
+    CryptoPP::CBC_Mode_ExternalCipher::Encryption cbcEncryption(aesEncryption, iv);
+
+    CryptoPP::StringSource ss(plaintext,true, new CryptoPP::StreamTransformationFilter(cbcEncryption, new CryptoPP::StringSink(cipher)));
+    return cipher;
+}
+
+//AES Decryption Function
+
+std::string decryptValue(const std::string &cipher, const CryptoPP::SecByteBlock &key, const CryptoPP::SecByteBlock& iv) {
+    std::string decrypted;
+    CryptoPP::AES::Decryption aesDecryption(key, CryptoPP::AES::DEFAULT_KEYLENGTH);
+    CryptoPP::CBC_Mode_ExternalCipher::Decryption cbcDecription(aesDecryption, iv);
+
+    CryptoPP::StringSource ss(cipher,true, new CryptoPP::StreamTransformationFilter(cbcDecription, new CryptoPP::StringSink(decrypted)));
+    return decrypted;
+}
 
 int main() {
     terminal myTerminal;
