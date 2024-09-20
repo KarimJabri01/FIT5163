@@ -367,10 +367,11 @@ public:
 
 class bank {
     private:
+        private:
         CryptoPP::RSA::PublicKey publicKey;
         CryptoPP::RSA::PrivateKey privateKey;
         CryptoPP::SecByteBlock secretKey = GenerateAESKey(AES_256_KEY_SIZE);
-        // std::string encSecretKey = encryptRSA(std::string(reinterpret_cast<const char*>(secretKey.data(), secretKey.size())), publicKey);
+        std::string encSecretKey;
         const int correctPin = 1234;                 // Correct PIN (in a real app, these values would be securely stored)
         const std::string correctPassword = "Password123";
     public:
@@ -419,14 +420,22 @@ class bank {
         std::cout << ERROR_MESSAGE << std::endl;
         return false;
     }
-        bank (){
-            generateBankRSAKeys();
-        }
 
-        void generateBankRSAKeys() {
+    bank () {
+        generateBankRSAKeys();
+        encSecKeySetter();
+    }
+
+    void generateBankRSAKeys() {
         CryptoPP::AutoSeededRandomPool rng;
         privateKey.GenerateRandomWithKeySize(rng, 2048);
         publicKey.AssignFrom(privateKey);
+    }
+
+    void encSecKeySetter() {
+        std::string tmp(secretKey.size(), 0);
+        std::memcpy(&tmp[0], secretKey.data(), secretKey.size());
+        encSecretKey = encryptRSA(tmp, publicKey);
     }
 
     // Helper function to encode a key to a string (Base64)
