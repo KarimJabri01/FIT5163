@@ -347,10 +347,10 @@ class bank {
         return false;
     }
         bank (){
-            generateRSAKeys();
+            generateBankRSAKeys();
         }
 
-        void generateRSAKeys() {
+        void generateBankRSAKeys() {
         CryptoPP::AutoSeededRandomPool rng;
         privateKey.GenerateRandomWithKeySize(rng, 2048);
         publicKey.AssignFrom(privateKey);
