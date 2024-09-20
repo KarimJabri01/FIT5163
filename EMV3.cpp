@@ -21,6 +21,93 @@ namespace fs = std::filesystem;
 const int MAX_ATTEMPTS = 3;
 const std::string ERROR_MESSAGE = "Authentication failed 3 times. Payment failed.";
 const std::string SUCCESS_MESSAGE = "Authentication successful! Proceeding with payment.";
+const int AES_128_KEY_SIZE = CryptoPP::AES::DEFAULT_KEYLENGTH;
+const int AES_192_KEY_SIZE = 24;
+const int AES_256_KEY_SIZE = CryptoPP::AES::MAX_KEYLENGTH;
+
+/// RSA ALGORITHM START
+// RSA key generation and encryption/decryption functions
+
+void generateRSAKeys(CryptoPP::RSA::PublicKey &publicKey, CryptoPP::RSA::PrivateKey &privateKey) {
+    CryptoPP::AutoSeededRandomPool rng;
+    privateKey.GenerateRandomWithKeySize(rng, 2048);
+    publicKey.AssignFrom(privateKey);
+}
+
+std::string encryptRSA(const std::string &plaintext, CryptoPP::RSA::PublicKey &publicKey) {
+    CryptoPP::AutoSeededRandomPool rng;
+    std::string cipher;
+    CryptoPP::RSAES_OAEP_SHA_Encryptor encryptor(publicKey);
+    CryptoPP::StringSource ss1(plaintext, true, new CryptoPP::PK_EncryptorFilter(rng, encryptor, new CryptoPP::StringSink(cipher)));
+    return cipher;
+}
+
+std::string decryptRSA(const std::string &cipher, CryptoPP::RSA::PrivateKey &privateKey) {
+    CryptoPP::AutoSeededRandomPool rng;
+    std::string recovered;
+    CryptoPP::RSAES_OAEP_SHA_Decryptor decryptor(privateKey);
+    CryptoPP::StringSource ss4(cipher, true, new CryptoPP::PK_DecryptorFilter(rng, decryptor, new CryptoPP::StringSink(recovered)));
+    return recovered;
+}
+
+void inputCardDetails(std::string& cardNumber, int &cvv, std::string& expiryDate) {
+    std::cout << "=================================================" << std::endl;
+    std::cout << "Please input your card details" << std::endl;
+    std::cout << "=================================================" << std::endl;
+    std::cout << "Input Card Number: ";
+    std::cin >> cardNumber;
+
+    std::cout << "Input CVV: ";
+    std::cin >> cvv;
+
+    std::cout << "Input Expiry Date (MM/YY): ";
+    std::cin >> expiryDate;
+    std::cout << "=================================================" << std::endl;
+    std::cout << "===================Thanks========================" << std::endl;
+    std::cout << "=================================================" << std::endl;
+
+}
+
+/// RSA finished.
+
+//AES Key Generation Function
+
+CryptoPP::SecByteBlock GenerateAESKey(int key_length) {
+    if (key_length != AES_128_KEY_SIZE && key_length != AES_192_KEY_SIZE && key_length != AES_256_KEY_SIZE) {
+        throw std::invalid_argument("Invalid AES key length, please choose between 128, 192, 256 bits.");
+    }
+
+    CryptoPP::SecByteBlock key(key_length);
+
+    CryptoPP::AutoSeededRandomPool rng;
+    rng.GenerateBlock(key, key.size());
+
+    return key;
+}
+
+//AES Encryption Function
+
+std::string encryptValue(const std::string &plaintext, const CryptoPP::SecByteBlock &key, const CryptoPP::SecByteBlock &iv){
+    std::string cipher;
+    CryptoPP::AES::Encryption aesEncryption(key, key.size());
+    CryptoPP::CBC_Mode_ExternalCipher::Encryption cbcEncryption(aesEncryption, iv);
+
+    CryptoPP::StringSource ss(plaintext,true, new CryptoPP::StreamTransformationFilter(cbcEncryption, new CryptoPP::StringSink(cipher)));
+    return cipher;
+}
+
+//AES Decryption Function
+
+std::string decryptValue(const std::string &cipher, const CryptoPP::SecByteBlock &key, const CryptoPP::SecByteBlock& iv) {
+    std::string decrypted;
+    CryptoPP::AES::Decryption aesDecryption(key, key.size());
+    CryptoPP::CBC_Mode_ExternalCipher::Decryption cbcDecription(aesDecryption, iv);
+
+    CryptoPP::StringSource ss(cipher,true, new CryptoPP::StreamTransformationFilter(cbcDecription, new CryptoPP::StringSink(decrypted)));
+    return decrypted;
+}
+
+
 // clear input buffer;
 void ClearInputBuffer() {
     std::cin.clear();
@@ -300,6 +387,10 @@ class bank {
         const std::string correctPassword = "Password123";
         const std::string correctToken = "Token123";
     public:
+
+    void setterSecretKey() {
+        secretKey = GenerateAESKey(AES_256_KEY_SIZE);
+    }
         // validators:
 
     bool ValidatePIN(int userPin) const {
@@ -585,96 +676,6 @@ class terminal {
             return (transactionType == 1) ? "Contactless" : "Contact";
         }
 };
-
-
-
-
-
-/// RSA ALGORITHM START
-// RSA key generation and encryption/decryption functions
-
-void generateRSAKeys(CryptoPP::RSA::PublicKey &publicKey, CryptoPP::RSA::PrivateKey &privateKey) {
-    CryptoPP::AutoSeededRandomPool rng;
-    privateKey.GenerateRandomWithKeySize(rng, 2048);
-    publicKey.AssignFrom(privateKey);
-}
-
-std::string encryptRSA(const std::string &plaintext, CryptoPP::RSA::PublicKey &publicKey) {
-    CryptoPP::AutoSeededRandomPool rng;
-    std::string cipher;
-    CryptoPP::RSAES_OAEP_SHA_Encryptor encryptor(publicKey);
-    CryptoPP::StringSource ss1(plaintext, true, new CryptoPP::PK_EncryptorFilter(rng, encryptor, new CryptoPP::StringSink(cipher)));
-    return cipher;
-}
-
-std::string decryptRSA(const std::string &cipher, CryptoPP::RSA::PrivateKey &privateKey) {
-    CryptoPP::AutoSeededRandomPool rng;
-    std::string recovered;
-    CryptoPP::RSAES_OAEP_SHA_Decryptor decryptor(privateKey);
-    CryptoPP::StringSource ss4(cipher, true, new CryptoPP::PK_DecryptorFilter(rng, decryptor, new CryptoPP::StringSink(recovered)));
-    return recovered;
-}
-
-void inputCardDetails(std::string& cardNumber, int &cvv, std::string& expiryDate) {
-    std::cout << "=================================================" << std::endl;
-    std::cout << "Please input your card details" << std::endl;
-    std::cout << "=================================================" << std::endl;
-    std::cout << "Input Card Number: ";
-    std::cin >> cardNumber;
-
-    std::cout << "Input CVV: ";
-    std::cin >> cvv;
-
-    std::cout << "Input Expiry Date (MM/YY): ";
-    std::cin >> expiryDate;
-    std::cout << "=================================================" << std::endl;
-    std::cout << "===================Thanks========================" << std::endl;
-    std::cout << "=================================================" << std::endl;
-
-}
-
-/// RSA finished.
-
-//AES Key Generation Function
-
-const int AES_128_KEY_SIZE = CryptoPP::AES::DEFAULT_KEYLENGTH;
-const int AES_192_KEY_SIZE = 24;
-const int AES_256_KEY_SIZE = CryptoPP::AES::MAX_KEYLENGTH;
-
-CryptoPP::SecByteBlock GenerateAESKey(int key_length) {
-    if (key_length != AES_128_KEY_SIZE && key_length != AES_192_KEY_SIZE && key_length != AES_256_KEY_SIZE) {
-        throw std::invalid_argument("Invalid AES key length, please choose between 128, 192, 256 bits.");
-    }
-
-    CryptoPP::SecByteBlock key(key_length);
-
-    CryptoPP::AutoSeededRandomPool rng;
-    rng.GenerateBlock(key, key.size());
-
-    return key;
-}
-
-//AES Encryption Function
-
-std::string encryptValue(const std::string &plaintext, const CryptoPP::SecByteBlock &key, const CryptoPP::SecByteBlock &iv){
-    std::string cipher;
-    CryptoPP::AES::Encryption aesEncryption(key, key.size());
-    CryptoPP::CBC_Mode_ExternalCipher::Encryption cbcEncryption(aesEncryption, iv);
-
-    CryptoPP::StringSource ss(plaintext,true, new CryptoPP::StreamTransformationFilter(cbcEncryption, new CryptoPP::StringSink(cipher)));
-    return cipher;
-}
-
-//AES Decryption Function
-
-std::string decryptValue(const std::string &cipher, const CryptoPP::SecByteBlock &key, const CryptoPP::SecByteBlock& iv) {
-    std::string decrypted;
-    CryptoPP::AES::Decryption aesDecryption(key, key.size());
-    CryptoPP::CBC_Mode_ExternalCipher::Decryption cbcDecription(aesDecryption, iv);
-
-    CryptoPP::StringSource ss(cipher,true, new CryptoPP::StreamTransformationFilter(cbcDecription, new CryptoPP::StringSink(decrypted)));
-    return decrypted;
-}
 
 // Read, Write and Encrypt CSV
 std::vector<std::vector<std::string>> readCSV(const std::string& filename) {
