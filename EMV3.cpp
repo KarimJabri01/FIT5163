@@ -137,45 +137,45 @@ private:
         if (card_number.empty()) {
         std::cout << "Card number is empty" << std::endl;
         return false;
-    }
-    if (!std::all_of(card_number.begin(), card_number.end(), ::isdigit)) {
-        std::cout << "Card number contains invalid characters" << std::endl;
-        return false;
-    }
-    int sum = 0;
-    bool alternate = true;
-    // Iterate over card number from the rightmost digit
-    for (int i = 0; i < card_number.length(); ++i) {
-        int n = card_number[i] - '0';
-
-        // If it's an alternate digit, double it
-        if (alternate) {
-            n *= 2;
-            // If the result is greater than 9, subtract 9
-            if (n > 9) {
-                n -= 9;
-            }
         }
-        
-        sum += n; 
-        alternate = !alternate;  // Flip the alternate flag
+        if (!std::all_of(card_number.begin(), card_number.end(), ::isdigit)) {
+            std::cout << "Card number contains invalid characters" << std::endl;
+            return false;
+        }
+        int sum = 0;
+        bool alternate = true;
+        // Iterate over card number from the rightmost digit
+        for (int i = 0; i < card_number.length(); ++i) {
+            int n = card_number[i] - '0';
+
+            // If it's an alternate digit, double it
+            if (alternate) {
+                n *= 2;
+                // If the result is greater than 9, subtract 9
+                if (n > 9) {
+                    n -= 9;
+                }
+            }
+            
+            sum += n; 
+            alternate = !alternate;  // Flip the alternate flag
+        }
+        return (sum % 10 == 0);
     }
-return (sum % 10 == 0);
-}
  //finish of lunhu
     std::string DetermineCardType () const {
         if (card_number[0] == '4' && (card_number.length() == 13 || card_number.length() == 16 || card_number.length() == 19)) {
         return "The Card is Visa";
+        }
+        int first_two_digits = std::stoi(card_number.substr(0,2));
+        int first_four_digits = std::stoi(card_number.substr(0,4));
+
+        if (card_number.length() == 16 && ((first_two_digits >= 51 && first_two_digits <= 55) || (first_four_digits > 2221 && first_four_digits <= 2720))) { // check for args
+            return " The Card is MasterCard/EuroCard"; // determine card 
+        }
+
+        return "Invalid Card Type"; //else invalid card
     }
-     int first_two_digits = std::stoi(card_number.substr(0,2));
-     int first_four_digits = std::stoi(card_number.substr(0,4));
-
-     if (card_number.length() == 16 && ((first_two_digits >= 51 && first_two_digits <= 55) || (first_four_digits > 2221 && first_four_digits <= 2720))) { // check for args
-        return " The Card is MasterCard/EuroCard"; // determine card 
-     }
-
-     return "Invalid Card Type"; //else invalid card
-}
 public:
     Card(const std::string &in_card_number, const int &in_cvv, const std::string &in_exp_date, const std::string & in_currency, const int &in_account_nb) 
         : card_number(in_card_number), cvv(in_cvv), exp_date(in_exp_date), currency(in_currency), account_nb(in_account_nb) {
@@ -194,34 +194,34 @@ public:
     }
 
     void check() const {
-     if (card_number.empty()) {
+        if (card_number.empty()) {
             std::cout << "Card number is empty" << std::endl; // Check for empty input
             return;
-    }
+        }
 
-    if (card_number.length() < 13) {
-        std::cout << "Card number is too short" << std::endl; 
-        return;
-    }
+        if (card_number.length() < 13) {
+            std::cout << "Card number is too short" << std::endl; 
+            return;
+        }
 
-    if (card_number.length() > 19) {
-        std::cout << "Card number is too long" << std::endl; 
-        return;
-    }
+        if (card_number.length() > 19) {
+            std::cout << "Card number is too long" << std::endl; 
+            return;
+        }
 
-    // Ensure all characters are digits
-    if (!std::all_of(card_number.begin(), card_number.end(), ::isdigit)) {
-        std::cout << "Card number contains invalid characters" << std::endl; 
-        return;
-    }
+        // Ensure all characters are digits
+        if (!std::all_of(card_number.begin(), card_number.end(), ::isdigit)) {
+            std::cout << "Card number contains invalid characters" << std::endl; 
+            return;
+        }
 
-    if (ValidatedLuhn()) {
-        std::cout << "Card Number is VALID" << std::endl;
-        std::cout << "Card Type: " << DetermineCardType() << std::endl;
-    } else {
-        std::cout << "Card Number is INVALID!" << std::endl;
+        if (ValidatedLuhn()) {
+            std::cout << "Card Number is VALID" << std::endl;
+            std::cout << "Card Type: " << DetermineCardType() << std::endl;
+        } else {
+            std::cout << "Card Number is INVALID!" << std::endl;
+        }
     }
-}
 };
 
 class bank {
