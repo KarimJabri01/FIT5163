@@ -597,15 +597,15 @@ void generateRSAKeys(CryptoPP::RSA::PublicKey &publicKey, CryptoPP::RSA::Private
     publicKey.AssignFrom(privateKey);
 }
 
-std::string encryptCardNumber(const std::string &cardNumber, CryptoPP::RSA::PublicKey &publicKey) {
+std::string encryptRSA(const std::string &plaintext, CryptoPP::RSA::PublicKey &publicKey) {
     CryptoPP::AutoSeededRandomPool rng;
     std::string cipher;
     CryptoPP::RSAES_OAEP_SHA_Encryptor encryptor(publicKey);
-    CryptoPP::StringSource ss1(cardNumber, true, new CryptoPP::PK_EncryptorFilter(rng, encryptor, new CryptoPP::StringSink(cipher)));
+    CryptoPP::StringSource ss1(plaintext, true, new CryptoPP::PK_EncryptorFilter(rng, encryptor, new CryptoPP::StringSink(cipher)));
     return cipher;
 }
 
-std::string decryptCardNumber(const std::string &cipher, CryptoPP::RSA::PrivateKey &privateKey) {
+std::string decryptRSA(const std::string &cipher, CryptoPP::RSA::PrivateKey &privateKey) {
     CryptoPP::AutoSeededRandomPool rng;
     std::string recovered;
     CryptoPP::RSAES_OAEP_SHA_Decryptor decryptor(privateKey);
