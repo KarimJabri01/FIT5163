@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <random>
 #include <ctime>
 #include <limits>
 #include <chrono>
@@ -626,8 +627,16 @@ class terminal {
             // Perform initialization if necessary
         }
 
+        long long int generateTUN(){
+            std::random_device rd;
+            std::mt19937_64 gen(rd());
+            std::uniform_int_distribution<long long int> dist(1000000000000000, 9999999999999999);
+            return dist(gen);
+        }
+
         // Add a transaction (with user input for transaction type: "Contactless" or "Contact")
-        void add_transaction(long long int tun, const std::string& curr, const std::string& data, std::string& date) {
+        void add_transaction(const std::string& curr, const std::string& data, std::string& date) {
+            long long int tun = generateTUN();
             std::string transaction_type = selectTransactionType();  // Get transaction type from user
             Transaction new_transaction(tun, curr, data, transaction_type, date);
             transaction_data.push_back(new_transaction);
@@ -728,7 +737,7 @@ int main() {
     generateRSAKeys(publicKey, privateKey);
 
 // tun int
-    long long int transaction_id = 6236423672646472;
+    
     std::string transaction_date = "20/05/2024";
     std::string card_number, expiry_date;
     int cvv;
@@ -741,7 +750,7 @@ int main() {
     std::cout << "======Please Select Your payment method==========" << std::endl;
     std::cout << "=================================================" << std::endl;
 
-    myTerminal.add_transaction(transaction_id, "USD", "Store Purchase", transaction_date); 
+    myTerminal.add_transaction("USD", "Store Purchase", transaction_date); 
 
     std::cout << "=================================================" << std::endl;
     std::string authMethod = myUser.GetAuthenticationChoice();
