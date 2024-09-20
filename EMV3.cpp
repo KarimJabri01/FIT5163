@@ -125,12 +125,12 @@ class UserData{ /// changes include replacing C type arras to more secure cpp on
     }
     std::string GetAuthenticationChoice() const {
         int choice;
-        std::cout << "Choose your transaction authentication method: press 1 for PIN, 2 for Password, and 3 for TOKEN: ";
+        std::cout << "Choose your transaction authentication method: press 1) for PIN or 2) for Password: ";
         while (true) {
             std::cin >> choice;
-            if (std::cin.fail() || (choice != 1 && choice != 2 && choice != 3)) {
+            if (std::cin.fail() || (choice != 1 && choice != 2)) {
                 ClearInputBuffer();
-                std::cout << "Invalid input. Please press 1 for PIN, 2 for Password, and 3 for TOKEN: ";
+                std::cout << "Invalid input. Please press 1) for PIN or 2) for Password: ";
             } else {
                 break;
             }
@@ -139,7 +139,6 @@ class UserData{ /// changes include replacing C type arras to more secure cpp on
         switch (choice) {
             case 1: return "PIN";
             case 2: return "Password";
-            case 3: return "TOKEN";
             default: return "";  // This should never happen
         }
     }
@@ -159,14 +158,6 @@ class UserData{ /// changes include replacing C type arras to more secure cpp on
         std::cout << "Enter your Password: ";
         std::getline(std::cin, password);
         return password;
-    }
-
-    // Function to get the Token from the user
-    std::string GetToken() const {
-        std::string token;
-        std::cout << "Enter your Token: ";
-        std::getline(std::cin, token);
-        return token;
     }
 
     private: // private for user security.
@@ -212,12 +203,9 @@ private:
 
     enum AuthMethod{
         PIN,
-        PASSWORD,
-        TOKEN
+        PASSWORD
     };
     AuthMethod auth_meth;
-
-
     // Masking Function:
 
     std::string getMaskedCardNumber() const{
@@ -385,7 +373,6 @@ class bank {
         // std::string encSecretKey = encryptRSA(std::string(reinterpret_cast<const char*>(secretKey.data(), secretKey.size())), publicKey);
         const int correctPin = 1234;                 // Correct PIN (in a real app, these values would be securely stored)
         const std::string correctPassword = "Password123";
-        const std::string correctToken = "Token123";
     public:
 
     void setterSecretKey() {
@@ -402,11 +389,6 @@ class bank {
         return userPassword == correctPassword;
     }
 
-    // Function to validate Token
-    bool ValidateToken(const std::string& userToken) const {
-        return userToken == correctToken;
-    }
-
     // Function to handle the overall authentication process
     bool Authenticate(const std::string& method, const UserData& user) {
         int attempts = 0;
@@ -420,9 +402,6 @@ class bank {
             } else if (method == "Password") {
                 std::string userPassword = user.GetPassword();
                 success = ValidatePassword(userPassword);
-            } else if (method == "TOKEN") {
-                std::string userToken = user.GetToken();
-                success = ValidateToken(userToken);
             }
 
             if (success) {
@@ -650,14 +629,21 @@ class terminal {
             for (const auto& trans : transaction_data) {
                 std::cout << "=================================================" << std::endl;
                 std::cout << "=========Your transaction information is :=======" << std::endl;
-                std::cout << "TUN: " << trans.TUN << ", Currency: " << trans.currency << ", Transaction location: " << trans.data 
-                << ", Transaction Type: " << trans.transaction_type << ", Transaction Date: " << trans.transaction_date << std::endl;
+        
+                std::cout << "TUN: " << trans.TUN 
+                  << ", Currency: " << trans.currency 
+                  << ", Transaction location: " << trans.data 
+                  << std::endl;
+                std::cout << "Transaction Type: " << trans.transaction_type 
+                << ", Transaction Date: " << trans.transaction_date << std::endl;
+        
+                // Add a space line for consistent length
             }
         }
         // Function to select transaction type ("Contactless" or "Contact")
         std::string selectTransactionType() {
             int transactionType;
-            std::cout << " Choose 1 for Contactless or 2 for Contact: ";
+            std::cout << " Choose 1) for Contactless or 2) for Contact: ";
 
             while (true) {
                 std::cin >> transactionType;
@@ -666,7 +652,7 @@ class terminal {
                 if (std::cin.fail() || (transactionType != 1 && transactionType != 2)) {
                     std::cin.clear();  // Clear the error flag on cin
                     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');  // Ignore invalid input
-                    std::cout << "Invalid input. Please enter 1 for Contactless or 2 for Contact: ";
+                    std::cout << "Invalid input. Please enter 1) for Contactless or 2) for Contact: ";
                 } else {
                     break;
                 }
@@ -790,4 +776,4 @@ int main() {
     myBank.printKeys(); 
     std::cout <<"==================================================" << std::endl;
     return 0;
-}
+};
