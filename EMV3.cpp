@@ -674,6 +674,53 @@ std::string decryptValue(const std::string &cipher, const CryptoPP::SecByteBlock
     return decrypted;
 }
 
+// Read, Write and Encrypt CSV
+std::vector<std::vector<std::string>> readCSV(const std::string& filename) {
+    std::ifstream file(filename);
+    std::vector<std::vector<std::string>> data;
+    std::string line;
+
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string value;
+        std::vector<std::string> row;
+        while (std::getline(ss, value, ',')) {
+            row.push_back(value);
+        }
+        data.push_back(row);
+    }
+    
+    file.close();
+    return data;
+}
+
+void writeCSV(const std::string& filename, const std::vector<std::vector<std::string>>& data) {
+    std::ofstream file(filename);
+    for (const auto& row : data) {
+        for (size_t i = 0; i < row.size(); ++i) {
+            file << row[i];
+            if (i != row.size() - 1) {
+                file << ",";
+            }
+        }
+        file << "\n";
+    }
+    file.close();
+}
+
+void encryptCSV(const std::string& inputFilename, const std::string& outputFilename, const CryptoPP::SecByteBlock& key, const CryptoPP::SecByteBlock& iv) {
+    std::vector<std::vector<std::string>> data = readCSV(inputFilename);
+
+    // Encrypt each value in the CSV
+    for (auto& row : data) {
+        for (auto& value : row) {
+            value = encryptValue(value, key, iv);
+        }
+    }
+
+    writeCSV(outputFilename, data);
+}
+
 int main() {
     terminal myTerminal;
     bank myBank;
