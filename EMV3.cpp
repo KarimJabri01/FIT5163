@@ -762,10 +762,10 @@ int main() {
     myTerminal.display_transactions();    /// shows TUN and info.
     std::cout << "=================================================" << std::endl;
     /// transaction data:
-    std::string encryptedCardNumber = encryptCardNumber(card_number, publicKey);
+    std::string encryptedCardNumber = encryptRSA(card_number, publicKey);
     std::cout << " Encrypted Card Number: " << encryptedCardNumber << std::endl;
     std::cout << "=================================================" << std::endl;
-    std::string decryptedCardNumber = decryptCardNumber(encryptedCardNumber, privateKey);
+    std::string decryptedCardNumber = decryptRSA(encryptedCardNumber, privateKey);
     std::cout << " Decrypted Card Number: " << decryptedCardNumber << std::endl;
     std::cout << "=================================================" << std::endl;
    /// now athentication method
