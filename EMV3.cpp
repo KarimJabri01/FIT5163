@@ -294,6 +294,8 @@ class bank {
     private:
         CryptoPP::RSA::PublicKey publicKey;
         CryptoPP::RSA::PrivateKey privateKey;
+        CryptoPP::SecByteBlock secretKey = GenerateAESKey(AES_256_KEY_SIZE);
+        std::string encSecretKey = encryptRSA(std::string(reinterpret_cast<const char*>(secretKey.data(), secretKey.size())), publicKey);
         const int correctPin = 1234;                 // Correct PIN (in a real app, these values would be securely stored)
         const std::string correctPassword = "Password123";
         const std::string correctToken = "Token123";
