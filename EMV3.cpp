@@ -542,6 +542,12 @@ class bank {
 
 
     bool checkCardDetail(const Card& card) {
+        std::string cardNum = decryptRSA(card.getCardNumber(), privateKey);
+        std::string accNum = decryptRSA(card.getAccountNb(), privateKey);
+        std::string cardCVV = decryptRSA(card.getCVV(), privateKey);
+        std::string cardExpD = decryptRSA(card.getExpDate(), privateKey);
+        std::string cardCurr = decryptRSA(card.getCurrency(), privateKey);
+
         std::string filename = "card_data.csv";
         std::ifstream file_in(filename);
         if (!file_in.is_open()) {
@@ -554,8 +560,11 @@ class bank {
         
         while (getline(file_in, line)) {
             std::vector<std::string> values = split(line, ',');
-            if (values[0] == card.getCardNumber() && values[1] == card.getAccountNb() && values[2] == card.getCVV() &&
-                values[3] == card.getExpDate() && values[4] == card.getCurrency()) {
+            for (int i = 0; i < values.size(); i++) {
+                values[i] = decryptRSA(values[i], privateKey);
+            }
+            if (values[0] == cardNum && values[1] == accNum && values[2] == cardCVV &&
+                values[3] == cardExpD && values[4] == cardCurr) {
                 found = true;
                 break;
             }
