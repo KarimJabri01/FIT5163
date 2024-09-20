@@ -14,6 +14,7 @@
 #include "cryptopp/filters.h"
 #include "cryptopp/aes.h"
 #include "cryptopp/modes.h"
+#include "cryptopp/secblock.h"
 #include <filesystem>  // Use standard filesystem for C++17
 namespace fs = std::filesystem;
 //// Global constant:
@@ -632,11 +633,30 @@ void inputCardDetails(std::string& cardNumber, int &cvv, std::string& expiryDate
 
 /// RSA finished.
 
+//AES Key Generation Function
+
+const int AES_128_KEY_SIZE = CryptoPP::AES::DEFAULT_KEYLENGTH;
+const int AES_192_KEY_SIZE = 24;
+const int AES_256_KEY_SIZE = CryptoPP::AES::MAX_KEYLENGTH;
+
+CryptoPP::SecByteBlock GenerateAESKey(int key_length) {
+    if (key_length != AES_128_KEY_SIZE && key_length != AES_192_KEY_SIZE && key_length != AES_256_KEY_SIZE) {
+        throw std::invalid_argument("Invalid AES key length, please choose between 128, 192, 256 bits.");
+    }
+
+    CryptoPP::SecByteBlock key(key_length);
+
+    CryptoPP::AutoSeededRandomPool rng;
+    rng.GenerateBlock(key, key.size());
+
+    return key;
+}
+
 //AES Encryption Function
 
 std::string encryptValue(const std::string &plaintext, const CryptoPP::SecByteBlock &key, const CryptoPP::SecByteBlock &iv){
     std::string cipher;
-    CryptoPP::AES::Encryption aesEncryption(key, CryptoPP::AES::DEFAULT_KEYLENGTH);
+    CryptoPP::AES::Encryption aesEncryption(key, key.size());
     CryptoPP::CBC_Mode_ExternalCipher::Encryption cbcEncryption(aesEncryption, iv);
 
     CryptoPP::StringSource ss(plaintext,true, new CryptoPP::StreamTransformationFilter(cbcEncryption, new CryptoPP::StringSink(cipher)));
@@ -647,7 +667,7 @@ std::string encryptValue(const std::string &plaintext, const CryptoPP::SecByteBl
 
 std::string decryptValue(const std::string &cipher, const CryptoPP::SecByteBlock &key, const CryptoPP::SecByteBlock& iv) {
     std::string decrypted;
-    CryptoPP::AES::Decryption aesDecryption(key, CryptoPP::AES::DEFAULT_KEYLENGTH);
+    CryptoPP::AES::Decryption aesDecryption(key, key.size());
     CryptoPP::CBC_Mode_ExternalCipher::Decryption cbcDecription(aesDecryption, iv);
 
     CryptoPP::StringSource ss(cipher,true, new CryptoPP::StreamTransformationFilter(cbcDecription, new CryptoPP::StringSink(decrypted)));
