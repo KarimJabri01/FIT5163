@@ -25,6 +25,7 @@ const std::string SUCCESS_MESSAGE = "Authentication successful! Proceeding with 
 const int AES_128_KEY_SIZE = CryptoPP::AES::DEFAULT_KEYLENGTH;
 const int AES_192_KEY_SIZE = 24;
 const int AES_256_KEY_SIZE = CryptoPP::AES::MAX_KEYLENGTH;
+CryptoPP::RSA::PublicKey BANK_PUBLIC_KEY{};
 
 /// RSA ALGORITHM START
 // RSA key generation and encryption/decryption functions
@@ -84,6 +85,13 @@ CryptoPP::SecByteBlock GenerateAESKey(int key_length) {
     rng.GenerateBlock(key, key.size());
 
     return key;
+}
+
+CryptoPP::SecByteBlock GenerateAESIV() {
+    CryptoPP::SecByteBlock iv(CryptoPP::AES::BLOCKSIZE);
+    CryptoPP::AutoSeededRandomPool rng;
+    rng.GenerateBlock(iv, iv.size());
+    return iv;
 }
 
 //AES Encryption Function
@@ -347,22 +355,22 @@ public:
 
     // Card Getter functions
     std::string getCardNumber() const {
-        return card_number;
+        return encryptRSA(card_number, BANK_PUBLIC_KEY);
     }
     std::string getAccountNb() const {
-        return std::to_string(account_nb);
+        return encryptRSA(std::to_string(account_nb), BANK_PUBLIC_KEY);
     }
     std::string getCVV() const {
-        return std::to_string(cvv);
+        return encryptRSA(std::to_string(cvv), BANK_PUBLIC_KEY);
     }
     std::string getExpDate() const {
-        return exp_date;
+        return encryptRSA(exp_date, BANK_PUBLIC_KEY);
     }
     std::string getCurrency() const {
-        return currency;
+        return encryptRSA(currency, BANK_PUBLIC_KEY);
     }
     std::string getBalance() const {
-        return std::to_string(balance);
+        return encryptRSA(std::to_string(balance), BANK_PUBLIC_KEY);
     }
 };
 
@@ -372,7 +380,7 @@ class bank {
         CryptoPP::RSA::PublicKey publicKey;
         CryptoPP::RSA::PrivateKey privateKey;
         CryptoPP::SecByteBlock secretKey = GenerateAESKey(AES_256_KEY_SIZE);
-        std::string encSecretKey;
+        CryptoPP::SecByteBlock iv = GenerateAESIV();
         const int correctPin = 1234;                 // Correct PIN (in a real app, these values would be securely stored)
         const std::string correctPassword = "Password123";
     public:
@@ -424,7 +432,8 @@ class bank {
 
     bank () {
         generateBankRSAKeys();
-        encSecKeySetter();
+        BANK_PUBLIC_KEY = publicKey;
+        encriptCSV("credit_card.csv");
     }
 
     void generateBankRSAKeys() {
@@ -433,11 +442,6 @@ class bank {
         publicKey.AssignFrom(privateKey);
     }
 
-    void encSecKeySetter() {
-        std::string tmp(secretKey.size(), 0);
-        std::memcpy(&tmp[0], secretKey.data(), secretKey.size());
-        encSecretKey = encryptRSA(tmp, publicKey);
-    }
 
     // Helper function to encode a key to a string (Base64)
     std::string encodeKeyToBase64(const CryptoPP::RSA::PublicKey& key) {
@@ -548,7 +552,7 @@ class bank {
         std::string cardExpD = decryptRSA(card.getExpDate(), privateKey);
         std::string cardCurr = decryptRSA(card.getCurrency(), privateKey);
 
-        std::string filename = "card_data.csv";
+        std::string filename = "enc_credit_card.csv";
         std::ifstream file_in(filename);
         if (!file_in.is_open()) {
             std::cerr << "Erroring opening file!" << std::endl;
@@ -561,7 +565,7 @@ class bank {
         while (getline(file_in, line)) {
             std::vector<std::string> values = split(line, ',');
             for (int i = 0; i < values.size(); i++) {
-                values[i] = decryptRSA(values[i], privateKey);
+                values[i] = decryptValue(values[i], secretKey, iv);
             }
             if (values[0] == cardNum && values[1] == accNum && values[2] == cardCVV &&
                 values[3] == cardExpD && values[4] == cardCurr) {
@@ -570,6 +574,40 @@ class bank {
             }
         }
         return found;
+    }
+
+    void encriptCSV(std::string filename) {
+        std::ifstream file_in(filename);
+        if (!file_in.is_open()) {
+            std::cerr << "Erroring opening file!" << std::endl;
+        }
+
+        std::string file_o = "enc_credit_card";
+        std::ofstream file_out(file_o, std::ios::out);
+        if (!file_out.is_open()) {
+            std::cerr << "Error opening file to write!" << std::endl;
+        }
+
+        std::vector<std::string> file_content;
+        std::string line;
+        
+        while (getline(file_in, line)) {
+            std::vector<std::string> values = split(line, ',');
+            std::vector<std::string> enc_values;
+            for (int i = 0; i < values.size(); ++i) {
+                enc_values[i] = encryptValue(values[i], secretKey, iv);
+            }
+
+            file_content.push_back(join(enc_values, ','));
+        }
+
+        file_in.close();
+
+        for (const auto& line : file_content) {
+            file_out << line << "\n";
+        }
+
+        file_out.close();   
     }
 
     std::vector<std::string> split(const std::string& line, char delimiter) {
@@ -744,6 +782,29 @@ int main() {
     CryptoPP::RSA::PublicKey publicKey;
     CryptoPP::RSA::PrivateKey privateKey;
     generateRSAKeys(publicKey, privateKey);
+
+    // Create two card objects, one valid and one invalid
+    Card validCard("4716893064521783",234, "11/26", "EUR", 12345679 );  // Valid card
+    Card invalidCard("987654321234567",191, "01/21","YEN", 12345678); // Invalid card (incorrect length for card number)
+
+
+    //Check if validCard details are correct:
+
+    bool isValidCard = myBank.checkCardDetail(validCard);
+    if (isValidCard) {
+        std::cout << "Valid card details found!" << std::endl;
+    } else {
+        std::cout << "Valid card details are not correct." << std::endl;
+    }
+
+    // Check if invalidCard details are correct
+    bool isInvalidCard = myBank.checkCardDetail(invalidCard);
+    if (isInvalidCard) {
+        std::cout << "Invalid card details found! (Should not happen)" << std::endl;
+    } else {
+        std::cout << "Invalid card details are not correct." << std::endl;
+    }
+
 
 // tun int
     
