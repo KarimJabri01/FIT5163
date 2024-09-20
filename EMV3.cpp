@@ -143,9 +143,9 @@ private:
         return false;
     }
     int sum = 0;
-    bool alternate = false;
+    bool alternate = true;
     // Iterate over card number from the rightmost digit
-    for (int i = card_number.length() - 1; i >= 0; --i) {
+    for (int i = 0; i < card_number.length(); ++i) {
         int n = card_number[i] - '0';
 
         // If it's an alternate digit, double it
