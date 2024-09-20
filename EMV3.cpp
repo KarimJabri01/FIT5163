@@ -526,11 +526,13 @@ class terminal {
             long long int TUN;  // Transaction unique number
             std::string currency;
             std::string data;  // Transaction data
-            std::string transaction_type;  // "Contactless" or "Contact"
+            std::string transaction_type;
+            std::string transaction_date;  // "Contactless" or "Contact"
 
             // Constructor
-            Transaction(long long int tun, const std::string& curr, const std::string& d, const std::string& t_type)
-                : TUN(tun), currency(curr), data(d), transaction_type(t_type) {}
+            Transaction(long long int tun, const std::string& curr, const std::string& d, const std::string& t_type, const std::string& date)
+            : TUN(tun), currency(curr), data(d), transaction_type(t_type), transaction_date(date) {}
+
         };
 
         // List to hold all transactions
@@ -543,9 +545,9 @@ class terminal {
         }
 
         // Add a transaction (with user input for transaction type: "Contactless" or "Contact")
-        void add_transaction(long long int tun, const std::string& curr, const std::string& data) {
+        void add_transaction(long long int tun, const std::string& curr, const std::string& data, std::string& date) {
             std::string transaction_type = selectTransactionType();  // Get transaction type from user
-            Transaction new_transaction(tun, curr, data, transaction_type);
+            Transaction new_transaction(tun, curr, data, transaction_type, date);
             transaction_data.push_back(new_transaction);
         }
 
@@ -554,7 +556,8 @@ class terminal {
             for (const auto& trans : transaction_data) {
                 std::cout << "=================================================" << std::endl;
                 std::cout << "=========Your transaction information is :=======" << std::endl;
-                std::cout << "TUN: " << trans.TUN << ", Currency: " << trans.currency << ", Transaction location: " << trans.data << ", Transaction Type: " << trans.transaction_type << std::endl;
+                std::cout << "TUN: " << trans.TUN << ", Currency: " << trans.currency << ", Transaction location: " << trans.data 
+                << ", Transaction Type: " << trans.transaction_type << ", Transaction Date: " << trans.transaction_date << std::endl;
             }
         }
         // Function to select transaction type ("Contactless" or "Contact")
@@ -661,7 +664,7 @@ int main() {
 
 // tun int
     long long int transaction_id = 6236423672646472;
-
+    std::string transaction_date = "20/05/2024";
     std::string card_number, expiry_date;
     int cvv;
     double balance;
@@ -673,7 +676,7 @@ int main() {
     std::cout << "======Please Select Your payment method==========" << std::endl;
     std::cout << "=================================================" << std::endl;
 
-    myTerminal.add_transaction(transaction_id, "USD", "Store Purchase"); 
+    myTerminal.add_transaction(transaction_id, "USD", "Store Purchase", transaction_date); 
 
     std::cout << "=================================================" << std::endl;
     std::string authMethod = myUser.GetAuthenticationChoice();
