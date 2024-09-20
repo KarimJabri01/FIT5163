@@ -551,10 +551,11 @@ class bank {
         std::string cardExpD = decryptRSA(card.getExpDate(), privateKey);
         std::string cardCurr = decryptRSA(card.getCurrency(), privateKey);
 
-        std::string filename = "card_data.csv";
+        std::string filename = "credit_card.csv";
         std::ifstream file_in(filename);
         if (!file_in.is_open()) {
             std::cerr << "Erroring opening file!" << std::endl;
+            return false;
         }
 
         std::vector<std::string> file_content;
@@ -751,6 +752,25 @@ int main() {
     // Create two card objects, one valid and one invalid
     Card validCard("4716893064521783",234, "11/26", "EUR", 12345679 );  // Valid card
     Card invalidCard("987654321234567",191, "01/21","YEN", 12345678); // Invalid card (incorrect length for card number)
+
+
+    //Check if validCard details are correct:
+
+    bool isValidCard = myBank.checkCardDetail(validCard);
+    if (isValidCard) {
+        std::cout << "Valid card details found!" << std::endl;
+    } else {
+        std::cout << "Valid card details are not correct." << std::endl;
+    }
+
+    // Check if invalidCard details are correct
+    bool isInvalidCard = myBank.checkCardDetail(invalidCard);
+    if (isInvalidCard) {
+        std::cout << "Invalid card details found! (Should not happen)" << std::endl;
+    } else {
+        std::cout << "Invalid card details are not correct." << std::endl;
+    }
+
 
 // tun int
     
