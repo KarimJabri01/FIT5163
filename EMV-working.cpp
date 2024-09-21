@@ -942,7 +942,7 @@ int main() {
     std::cout << "=================================================" << std::endl;
     std::cout <<" The banks keys are" << std::endl;
     std::cout <<"==================================================" << std::endl;
-    // myBank.printKeys(); 
+    myBank.printKeys(); 
     std::cout <<"==================================================" << std::endl;
     return 0;
 };
