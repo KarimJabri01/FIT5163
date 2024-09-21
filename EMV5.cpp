@@ -28,7 +28,7 @@ const int AES_128_KEY_SIZE = CryptoPP::AES::DEFAULT_KEYLENGTH;
 const int AES_192_KEY_SIZE = 24;
 const int AES_256_KEY_SIZE = CryptoPP::AES::MAX_KEYLENGTH;
 CryptoPP::RSA::PublicKey BANK_PUBLIC_KEY{};
-CryptoPP::SecByteBlock AES_IV{};
+//CryptoPP::SecByteBlock AES_IV{};
 
 /// RSA ALGORITHM START
 // RSA key generation and encryption/decryption functions
@@ -59,28 +59,6 @@ std::string decryptRSA(const std::string &encodedCipher, CryptoPP::RSA::PrivateK
     
     return recovered;
 }
-
-void inputCardDetails(std::string& cardNumber, int &cvv, std::string& expiryDate) {
-    std::cout << "=================================================" << std::endl;
-    std::cout << "Please input your card details" << std::endl;
-    std::cout << "=================================================" << std::endl;
-    std::cout << "Input Card Number: ";
-    std::cin >> cardNumber;
-
-    std::cout << "Input CVV: ";
-    std::cin >> cvv;
-
-    std::cout << "Input Expiry Date (MM/YY): ";
-    std::cin >> expiryDate;
-    std::cout << "=================================================" << std::endl;
-    std::cout << "===================Thanks========================" << std::endl;
-    std::cout << "=================================================" << std::endl;
-
-}
-
-/// RSA finished.
-
-//AES Key Generation Function
 
 CryptoPP::SecByteBlock GenerateAESKey(int key_length) {
     if (key_length != AES_128_KEY_SIZE && key_length != AES_192_KEY_SIZE && key_length != AES_256_KEY_SIZE) {
@@ -134,56 +112,6 @@ std::string HashPass(std::string pass) {
 
     return hash_value;
 } 
-
-// Read, Write and Encrypt CSV
-std::vector<std::vector<std::string>> readCSV(const std::string& filename) {
-    std::ifstream file(filename);
-    std::vector<std::vector<std::string>> data;
-    std::string line;
-
-    while (std::getline(file, line)) {
-        std::stringstream ss(line);
-        std::string value;
-        std::vector<std::string> row;
-        while (std::getline(ss, value, ',')) {
-            row.push_back(value);
-        }
-        data.push_back(row);
-    }
-    
-    file.close();
-    return data;
-}
-
-void writeCSV(const std::string& filename, const std::vector<std::vector<std::string>>& data) {
-    std::ofstream file(filename);
-    for (const auto& row : data) {
-        for (size_t i = 0; i < row.size(); ++i) {
-            file << row[i];
-            if (i != row.size() - 1) {
-                file << ",";
-            }
-        }
-        file << "\n";
-    }
-    file.close();
-}
-
-void encryptCSV(const std::string& inputFilename, const std::string& outputFilename, const CryptoPP::SecByteBlock& key, const CryptoPP::SecByteBlock& iv) {
-    std::vector<std::vector<std::string>> data = readCSV(inputFilename);
-
-    // Encrypt each value in the CSV
-    for (auto& row : data) {
-        for (auto& value : row) {
-            value = encryptValue(value, key, iv);
-        }
-    }
-
-    writeCSV(outputFilename, data);
-}
-
-
-
 // clear input buffer;
 void ClearInputBuffer() {
     std::cin.clear();
@@ -196,9 +124,6 @@ class UserData{ /// changes include replacing C type arras to more secure cpp on
              : fname(firstName), lname(lastName), address(address) {
                 acc_num=getLastRowOfColumn()+1;
              }
-    void DisplayUserInfo() const{
-        std::cout << fname << " " << lname << " residing at " << address << std::endl;
-    }
     std::string GetAuthenticationChoice() const {
         int choice;
         std::cout << "Choose your transaction authentication method: press 1) for PIN or 2) for Password: ";
@@ -219,22 +144,6 @@ class UserData{ /// changes include replacing C type arras to more secure cpp on
         }
     }
 
-    // Function to get the PIN from the user
-    int GetPIN() const {
-        int pin;
-        std::cout << "Enter your PIN: ";
-        std::cin >> pin;
-        ClearInputBuffer();
-        return pin;
-    }
-
-    // Function to get the Password from the user
-    std::string GetPassword() const {
-        std::string password;
-        std::cout << "Enter your Password: ";
-        std::getline(std::cin, password);
-        return password;
-    }
 
     private: // private for user security.
     std::string fname;
@@ -521,7 +430,6 @@ class bank {
     bank () {
         generateBankRSAKeys();
         BANK_PUBLIC_KEY = GetPublicKey();
-        AES_IV = GetIV();
         bankEncryptCSV("credit_card.csv");
     }
 
@@ -568,32 +476,32 @@ class bank {
         std::cout << "Private Key (Base64 Encoded): \n" << encodedPrivateKey << "\n";
     }
 
+    /// expainsion in mind.
+    // void CreatUser() {
+    //     std::string fname;
+    //     std::cout << "Enter first name: " << std::endl;
+    //     std::cin >> fname;
 
-    void CreatUser() {
-        std::string fname;
-        std::cout << "Enter first name: " << std::endl;
-        std::cin >> fname;
+    //     std::string lname;
+    //     std::cout << "Enter last name: " << std::endl;
+    //     std::cin >> lname;
 
-        std::string lname;
-        std::cout << "Enter last name: " << std::endl;
-        std::cin >> lname;
+    //     std::string currency;
+    //     std::cout << "Enter currency: " << std::endl;
+    //     std::cin >> currency;
 
-        std::string currency;
-        std::cout << "Enter currency: " << std::endl;
-        std::cin >> currency;
+    //     std::string address;
+    //     std::cout << "Enter address: " << std::endl;
+    //     std::cin >> address;
 
-        std::string address;
-        std::cout << "Enter address: " << std::endl;
-        std::cin >> address;
+    //     double balance = 0;
 
-        double balance = 0;
+    //     // UserData customer(fname, lname, address);
+    //     // //customer.SaveToCSV();
+    //     // customer.DisplayUserInfo();
+    // }
 
-        UserData customer(fname, lname, address);
-        //customer.SaveToCSV();
-        customer.DisplayUserInfo();
-    }
-
-
+ // 
     bool cardAuthentication(Card &card) {
         bool isAuthenticated = false;
 
@@ -612,7 +520,7 @@ class bank {
 
         return isAuthenticated;
     }
-
+    //// Behnam working on it rn
     // std::string balanceChange(const std::string card_number, double cost) {
     //     std::string filename = "card_data.csv";
     //     std::ifstream file_in(filename);
@@ -827,15 +735,28 @@ class terminal {
         }
 };
 
+std::string GetCurrentDateTime() {
+    int currenthr, currentday, currentmonth, currentyear, currentmin;
+    time_t t = time(0);                     // Get current time
+    struct tm* now = localtime(&t);          // Convert to local time
+    currenthr = now->tm_hour;                // Current hour
+    currentmin = now->tm_min;
+    currentday = now->tm_mday;               // Current day of the month
+    currentmonth = (now->tm_mon) + 1;        // tm_mon is zero-based, so add 1 for a human-readable month (1-12)
+    currentyear = (now->tm_year) % 100;      // Get the last two digits of the year
+
+    // Concatenate the date and time as a string
+    std::string DateTime = std::to_string(currenthr) + ":" + std::to_string(currentmin) + " - " + std::to_string(currentday) + "/" +
+                           std::to_string(currentmonth) + "/" + std::to_string(currentyear) + " AEST";
+    return DateTime;
+}
+
 
 int main() {
     terminal myTerminal;
     bank myBank;
     UserData myUser("Bob", "Star", "11 Park Avenue, Switzerland");
-    // CryptoPP::RSA::PublicKey publicKey;
-    // CryptoPP::RSA::PrivateKey privateKey;
-    // generateRSAKeys(publicKey, privateKey);
-
+    
     // Create two card objects, one valid and one invalid
     Card validCard("4716893064521783", 234, "11/26", "EUR", 12345679 );  // Valid card
     //Card invalidCard("987654321234567",191, "01/28","YEN", 12345678); // Invalid card (incorrect length for card number)
@@ -849,28 +770,14 @@ int main() {
         std::cout << " Card details found!" << std::endl;
     } else {
         std::cout << "=================================================" << std::endl;
-        std::cout << " Card details are not correct." << std::endl;
+        std::cout << " Card details are Invalid." << std::endl;
+        return 1;
     }
-
-    //No need for this function to exist, argument boolean result already gets passed with is valid card. Running it twice will cause a logic error. If not valid == invalid.
-    
-    // Check if invalidCard details are correct
-    // bool isInvalidCard = myBank.checkCardDetail(invalidCard);
-    // if (isInvalidCard) {
-    //     std::cout << "Invalid card details found! (Should not happen)" << std::endl;
-    // } else {
-    //     std::cout << "Invalid card details are not correct." << std::endl;
-    // }
 
 
 // tun int
     
-    std::string transaction_date = "20/05/2024";
-    // std::string card_number, expiry_date;
-    // int cvv;
-    // double balance;
-    // std::string currency;
-    // int account_nb;
+    std::string transaction_date = GetCurrentDateTime();
     
 
     std::cout << "=================================================" << std::endl;
@@ -881,48 +788,18 @@ int main() {
 
     std::cout << "=================================================" << std::endl;
     myTerminal.validate_authentication(myBank, validCard);
-    // if (myTerminal.validate_authentication(myBank, validCard)) {
-    //     std::cout << "valid" << std::endl;
-    // }
-    // else {
-    //     std::cout << "invalid" << std::endl;
-    // }
-    // std::string authMethod = myUser.GetAuthenticationChoice();
-    // inputCardDetails(card_number, cvv, expiry_date);
-    // try {
-    //     Card card(card_number, cvv, expiry_date, currency, account_nb);
-    //     card.check();
-    // } catch (const std::exception& e) {
-    //     std::cout << e.what() << std::endl;
-    //     return 1;
-    // }
-    // Prints:
+    
     std::cout << "=================================================" << std::endl;
     // myUser.DisplayUserInfo(); // shows information about the user.
     myTerminal.display_transactions();    /// shows TUN and info.
     std::cout << "=================================================" << std::endl;
-    /// transaction data:
-    // std::string encryptedCardNumber = encryptRSA(card_number, publicKey);
-    // std::cout << " Encrypted Card Number: " << encryptedCardNumber << std::endl;
-    // std::string decryptedCardNumber = decryptRSA(encryptedCardNumber, privateKey);
-    // std::cout << " Decrypted Card Number: " << decryptedCardNumber << std::endl;
-   /// now athentication method
     
-    
-    // bool isAuthenticated = myBank.Authenticate(authMethod, myUser);
-    //     if (isAuthenticated) {
-    //         std::cout << "Payment successful!" << std::endl;
-    //     } else {
-    //         std::cout << "Too many failed attempts. Please try again later.\n";
-    //         std::this_thread::sleep_for(std::chrono::seconds(5));  // Simulate lockout
-    //     }
-
     std::cout << "=================================================" << std::endl;
     std::cout << " Compiled successfully!" << std::endl;
     std::cout << "=================================================" << std::endl;
     std::cout <<" The banks keys are" << std::endl;
     std::cout <<"==================================================" << std::endl;
-    // myBank.printKeys(); 
+    myBank.printKeys(); 
     std::cout <<"==================================================" << std::endl;
     return 0;
 };
