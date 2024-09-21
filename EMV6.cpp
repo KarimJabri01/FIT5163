@@ -131,6 +131,7 @@ class UserData{ /// changes include replacing C type arras to more secure cpp on
             std::cin >> choice;
             if (std::cin.fail() || (choice != 1 && choice != 2)) {
                 ClearInputBuffer();
+                std::cout << "======================================================" << std::endl;
                 std::cout << "Invalid input. Please press 1) for PIN or 2) for Password: ";
             } else {
                 break;
@@ -398,6 +399,7 @@ class bank {
                 std::string in_pin;
                 std::cout << "Enter your PIN: ";
                 std::cin >> in_pin;
+
                 if (HashPass(decPass) == HashPass(in_pin)) {
                     success = true;
                     break;
@@ -407,6 +409,7 @@ class bank {
                 std::string in_pass;
                 std::cout << "Enter your Password: ";
                 std::cin >> in_pass;
+                std::cout << "======================================================" << std::endl;
                 if (HashPass(decPass) == HashPass(in_pass)) {
                     success = true;
                     break;
@@ -415,6 +418,7 @@ class bank {
 
             if (attempts < MAX_ATTEMPTS) {
                 std::cout << "Please try again. You have " << MAX_ATTEMPTS - attempts << " attempt(s) remaining.\n";
+                std::cout << "======================================================" << std::endl;
             }
             else {
                 std::cout << ERROR_MESSAGE << std::endl;
@@ -482,7 +486,7 @@ class bank {
 
         
         std::cout << "Public Key (Base64 Encoded): \n" << encodedPublicKey << "\n";
-        std::cout <<"==================================================" << std::endl;
+        std::cout << "======================================================" << std::endl;
         std::cout << "Private Key (Base64 Encoded): \n" << encodedPrivateKey << "\n";
     }
 
@@ -540,14 +544,14 @@ class bank {
                 double decBal = std::stod(decryptValue(each.card_bal, secretKey, iv));
                 std::string decCurr = (decryptValue(each.card_currency, secretKey, iv));
 
-                std::cout << "current balance " << std::fixed << std::setprecision(2) << decBal << " " << decCurr << std::endl;
+                std::cout << "Current balance " << std::fixed << std::setprecision(2) << decBal << " " << decCurr << std::endl;
 
-                if (!decBal <= cost) {
+                if (!(decBal <= cost)) {
                     decBal -= cost;
 
                     each.card_bal = encryptValue(std::to_string(decBal), secretKey, iv);
 
-                    std::cout << "Payment Successful, " << std::fixed << std::setprecision(2) << cost << " " << decCurr << " withdrawn. Your Balance is: " << std::fixed << std::setprecision(2) << decBal << " " << decCurr << std::endl;
+                    std::cout << "Payment Successful, " << std::fixed << std::setprecision(2) << cost << " " << decCurr << " withdrawn.\nYour Balance is: " << std::fixed << std::setprecision(2) << decBal << " " << decCurr << std::endl;
                     return;
                 }
                 else {
@@ -689,8 +693,8 @@ class terminal {
         // Display all transactions
         void display_transactions() const {
             for (const auto& trans : transaction_data) {
-                std::cout << "=========Your transaction information is :=======" << std::endl;
-                std::cout << "=================================================" << std::endl;
+                std::cout << "========== Your transaction information is:===========" << std::endl;
+                std::cout << "======================================================" << std::endl;
 
                 std::cout << "TUN: " << trans.TUN 
                   << ", Currency: " << trans.currency 
@@ -698,7 +702,7 @@ class terminal {
                 std::cout<< "Transaction location: " << trans.data 
                   << std::endl;
                 std::cout << "Transaction Type: " << trans.transaction_type 
-                << ", Date: " << trans.transaction_date << std::endl;
+                << "Date: " << trans.transaction_date << std::endl;
         
                 // Add a space line for consistent length
             }
@@ -706,7 +710,7 @@ class terminal {
         // Function to select transaction type ("Contactless" or "Contact")
         std::string selectTransactionType() {
             int transactionType;
-            std::cout << " Choose 1) for Contactless | 2) for Contact: ";
+            std::cout << "     Choose 1) for Contactless | 2) for Contact: ";
 
             while (true) {
                 std::cin >> transactionType;
@@ -715,6 +719,7 @@ class terminal {
                 if (std::cin.fail() || (transactionType != 1 && transactionType != 2)) {
                     std::cin.clear();  // Clear the error flag on cin
                     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');  // Ignore invalid input
+                    std::cout << "======================================================" << std::endl;
                     std::cout << "Invalid input. Please enter 1) for Contactless or 2) for Contact: ";
                 } else {
                     break;
@@ -722,7 +727,7 @@ class terminal {
             }
 
             // Return the transaction type as a string
-            return (transactionType == 1) ? "Contactless" : "Contact";
+            return (transactionType == 1) ? "Contactless\n" : "Contact\n";
         }
 };
 
@@ -737,7 +742,7 @@ std::string GetCurrentDateTime() {
     currentyear = (now->tm_year) % 100;      // Get the last two digits of the year
 
     // Concatenate the date and time as a string
-    std::string DateTime = std::to_string(currenthr) + ":" + std::to_string(currentmin) + " - " + std::to_string(currentday) + "/" +
+    std::string DateTime = std::to_string(currenthr) + ":" + std::to_string(currentmin) + " HRS - " + std::to_string(currentday) + "/" +
                            std::to_string(currentmonth) + "/" + std::to_string(currentyear) + " AEST";
     return DateTime;
 }
@@ -757,10 +762,10 @@ int main() {
 
     bool isValidCard = myBank.checkCardDetail(validCard);
     if (isValidCard) {
-        std::cout << "=================================================" << std::endl;
-        std::cout << " Card details found!" << std::endl;
+        std::cout << "======================================================" << std::endl;
+        std::cout << "                Card details found!" << std::endl;
     } else {
-        std::cout << "=================================================" << std::endl;
+        std::cout << "======================================================" << std::endl;
         std::cout << " Card details are Invalid." << std::endl;
         return 1;
     }
@@ -771,28 +776,28 @@ int main() {
     std::string transaction_date = GetCurrentDateTime();
     
 
-    std::cout << "=================================================" << std::endl;
-    std::cout << "======Please Select Your payment method==========" << std::endl;
-    std::cout << "=================================================" << std::endl;
+    std::cout << "======================================================" << std::endl;
+    std::cout << "======= Please Select Your payment method: ===========" << std::endl;
+    std::cout << "======================================================" << std::endl;
 
-    myTerminal.add_transaction(myBank.GetCurrency(validCard), "Store Purchase", transaction_date);
+    myTerminal.add_transaction(myBank.GetCurrency(validCard), "Store Purchase",transaction_date);
 
-    std::cout << "=================================================" << std::endl;
+    std::cout << "======================================================" << std::endl;
     myTerminal.validate_authentication(myBank, validCard);
 
     myBank.balanceChange(validCard, 234.5);
     
-    std::cout << "=================================================" << std::endl;
+    std::cout << "======================================================" << std::endl;
     // myUser.DisplayUserInfo(); // shows information about the user.
     myTerminal.display_transactions();    /// shows TUN and info.
-    std::cout << "=================================================" << std::endl;
+    std::cout << "======================================================" << std::endl;
     
-    std::cout << "=================================================" << std::endl;
-    std::cout << " Compiled successfully!" << std::endl;
-    std::cout << "=================================================" << std::endl;
-    std::cout <<" The banks keys are" << std::endl;
-    std::cout <<"==================================================" << std::endl;
+    
+    std::cout << "              Compiled successfully!" << std::endl;
+    std::cout << "======================================================" << std::endl;
+    std::cout << "                The banks keys are: " << std::endl;
+    std::cout << "======================================================" << std::endl;
     myBank.printKeys(); 
-    std::cout <<"==================================================" << std::endl;
+    std::cout << "======================================================" << std::endl;
     return 0;
 };
