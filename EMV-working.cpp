@@ -811,15 +811,16 @@ class terminal {
         // Display all transactions
         void display_transactions() const {
             for (const auto& trans : transaction_data) {
-                std::cout << "=================================================" << std::endl;
                 std::cout << "=========Your transaction information is :=======" << std::endl;
-        
+                std::cout << "=================================================" << std::endl;
+
                 std::cout << "TUN: " << trans.TUN 
                   << ", Currency: " << trans.currency 
-                  << ", Transaction location: " << trans.data 
+                  << std::endl;
+                std::cout<< "Transaction location: " << trans.data 
                   << std::endl;
                 std::cout << "Transaction Type: " << trans.transaction_type 
-                << ", Transaction Date: " << trans.transaction_date << std::endl;
+                << ", Date: " << trans.transaction_date << std::endl;
         
                 // Add a space line for consistent length
             }
@@ -827,7 +828,7 @@ class terminal {
         // Function to select transaction type ("Contactless" or "Contact")
         std::string selectTransactionType() {
             int transactionType;
-            std::cout << " Choose 1) for Contactless or 2) for Contact: ";
+            std::cout << " Choose 1) for Contactless | 2) for Contact: ";
 
             while (true) {
                 std::cin >> transactionType;
@@ -858,25 +859,29 @@ int main() {
 
     // Create two card objects, one valid and one invalid
     Card validCard("4716893064521783", 234, "11/26", "EUR", 12345679 );  // Valid card
-    Card invalidCard("987654321234567",191, "01/28","YEN", 12345678); // Invalid card (incorrect length for card number)
+    //Card invalidCard("987654321234567",191, "01/28","YEN", 12345678); // Invalid card (incorrect length for card number)
 
 
     //Check if validCard details are correct:
 
     bool isValidCard = myBank.checkCardDetail(validCard);
     if (isValidCard) {
-        std::cout << "Valid card details found!" << std::endl;
+        std::cout << "=================================================" << std::endl;
+        std::cout << " Card details found!" << std::endl;
     } else {
-        std::cout << "Valid card details are not correct." << std::endl;
+        std::cout << "=================================================" << std::endl;
+        std::cout << " Card details are not correct." << std::endl;
     }
 
+    //No need for this function to exist, argument boolean result already gets passed with is valid card. Running it twice will cause a logic error. If not valid == invalid.
+    
     // Check if invalidCard details are correct
-    bool isInvalidCard = myBank.checkCardDetail(invalidCard);
-    if (isInvalidCard) {
-        std::cout << "Invalid card details found! (Should not happen)" << std::endl;
-    } else {
-        std::cout << "Invalid card details are not correct." << std::endl;
-    }
+    // bool isInvalidCard = myBank.checkCardDetail(invalidCard);
+    // if (isInvalidCard) {
+    //     std::cout << "Invalid card details found! (Should not happen)" << std::endl;
+    // } else {
+    //     std::cout << "Invalid card details are not correct." << std::endl;
+    // }
 
 
 // tun int
@@ -913,17 +918,14 @@ int main() {
     // }
     // Prints:
     std::cout << "=================================================" << std::endl;
-    std::cout << "User data is: " << std::endl;
     // myUser.DisplayUserInfo(); // shows information about the user.
     myTerminal.display_transactions();    /// shows TUN and info.
     std::cout << "=================================================" << std::endl;
     /// transaction data:
     // std::string encryptedCardNumber = encryptRSA(card_number, publicKey);
     // std::cout << " Encrypted Card Number: " << encryptedCardNumber << std::endl;
-    std::cout << "=================================================" << std::endl;
     // std::string decryptedCardNumber = decryptRSA(encryptedCardNumber, privateKey);
     // std::cout << " Decrypted Card Number: " << decryptedCardNumber << std::endl;
-    std::cout << "=================================================" << std::endl;
    /// now athentication method
     
     
