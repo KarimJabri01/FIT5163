@@ -35,7 +35,7 @@ CryptoPP::RSA::PublicKey BANK_PUBLIC_KEY{};
 
 void generateRSAKeys(CryptoPP::RSA::PublicKey &publicKey, CryptoPP::RSA::PrivateKey &privateKey) {
     CryptoPP::AutoSeededRandomPool rng;
-    privateKey.GenerateRandomWithKeySize(rng, 4096);
+    privateKey.GenerateRandomWithKeySize(rng, 2048);
     publicKey.AssignFrom(privateKey);
 }
 
@@ -182,9 +182,7 @@ private:
     double balance;
     std::string currency;
     const int account_nb;
-    int pin;
-    std::string password;
-    std::string token;
+    std::string authentication_pass;
     bool validate=false;
 
     enum AuthMethod{
