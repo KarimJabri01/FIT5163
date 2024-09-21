@@ -30,11 +30,25 @@ CryptoPP::RSA::PublicKey BANK_PUBLIC_KEY{};
 /// RSA ALGORITHM START
 // RSA key generation and encryption/decryption functions
 
+/*
+ The generateRSAKeys() function:
+ Generate a new RSA key pair and uses a random pool generator 
+ to create a 2048-bit private key and then
+ assigns the public key from the private key
+*/
+
 void generateRSAKeys(CryptoPP::RSA::PublicKey &publicKey, CryptoPP::RSA::PrivateKey &privateKey) {
     CryptoPP::AutoSeededRandomPool rng;
     privateKey.GenerateRandomWithKeySize(rng, 2048);
     publicKey.AssignFrom(privateKey);
 }
+
+/*
+ The encryptRSA() function:
+ Encrypts a plaintext using RSA encryption 
+ with the public key.
+ Uses OAEP padding for secure encryption and returns the ciphertext
+*/
 
 std::string encryptRSA(const std::string &plaintext, CryptoPP::RSA::PublicKey &publicKey) {
     CryptoPP::AutoSeededRandomPool rng;
@@ -44,6 +58,12 @@ std::string encryptRSA(const std::string &plaintext, CryptoPP::RSA::PublicKey &p
     return cipher;
 }
 
+/*
+ The decryptRSA() function:
+ Decrypts a ciphertext string using RSA decryption with the private key.
+ Uses OAEP padding and returns the recovered plaintext.
+*/
+
 std::string decryptRSA(const std::string &cipher, CryptoPP::RSA::PrivateKey &privateKey) {
     CryptoPP::AutoSeededRandomPool rng;
     std::string recovered;
@@ -51,6 +71,12 @@ std::string decryptRSA(const std::string &cipher, CryptoPP::RSA::PrivateKey &pri
     CryptoPP::StringSource ss4(cipher, true, new CryptoPP::PK_DecryptorFilter(rng, decryptor, new CryptoPP::StringSink(recovered)));
     return recovered;
 }
+
+/*
+ The inputCardDetails() function:
+ Make the user to input credit card details (card number, CVV, expiry date).
+ Then it displays a formatted interface for input and confirmation
+*/
 
 void inputCardDetails(std::string& cardNumber, int &cvv, std::string& expiryDate) {
     std::cout << "=================================================" << std::endl;
@@ -74,6 +100,12 @@ void inputCardDetails(std::string& cardNumber, int &cvv, std::string& expiryDate
 
 //AES Key Generation Function
 
+/*
+ The GenerateAESKey():
+ Generates an AES key with a specified key length (128, 192, or 256 bits).
+ Throws an exception if the key length is invalid.
+*/
+
 CryptoPP::SecByteBlock GenerateAESKey(int key_length) {
     if (key_length != AES_128_KEY_SIZE && key_length != AES_192_KEY_SIZE && key_length != AES_256_KEY_SIZE) {
         throw std::invalid_argument("Invalid AES key length, please choose between 128, 192, 256 bits.");
@@ -87,6 +119,12 @@ CryptoPP::SecByteBlock GenerateAESKey(int key_length) {
     return key;
 }
 
+/*
+ The GenerateAESIV():
+ Generates an AES initialization vector (IV) of block size for AES (16 bytes).
+ Returns the generated IV.
+*/
+
 CryptoPP::SecByteBlock GenerateAESIV() {
     CryptoPP::SecByteBlock iv(CryptoPP::AES::BLOCKSIZE);
     CryptoPP::AutoSeededRandomPool rng;
@@ -95,6 +133,11 @@ CryptoPP::SecByteBlock GenerateAESIV() {
 }
 
 //AES Encryption Function
+/*
+ The encryptValue():
+ Encrypts a plaintext string using AES in CBC mode.
+ Returns the encrypted ciphertext.
+*/
 
 std::string encryptValue(const std::string &plaintext, const CryptoPP::SecByteBlock &key, const CryptoPP::SecByteBlock &iv){
     std::string cipher;
@@ -106,6 +149,11 @@ std::string encryptValue(const std::string &plaintext, const CryptoPP::SecByteBl
 }
 
 //AES Decryption Function
+/*
+ The decryptValue() function:
+ Decrypts a ciphertext string using AES in CBC mode.
+ Returns the decrypted plaintext.
+*/
 
 std::string decryptValue(const std::string &cipher, const CryptoPP::SecByteBlock &key, const CryptoPP::SecByteBlock& iv) {
     std::string decrypted;
@@ -118,10 +166,24 @@ std::string decryptValue(const std::string &cipher, const CryptoPP::SecByteBlock
 
 
 // clear input buffer;
+
+/*
+ The ClearInputBuffer() function:
+ Clears the input buffer in case of invalid input (clears any leftover input).
+ Prevent buffer overflow or input errors during user interaction.
+*/
 void ClearInputBuffer() {
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
+
+/*
+ Class UserData:
+ Stores the user's personal data such as first name, last name, and address.
+ Has methods to display user info, choose an authentication method (PIN or password), and input PIN or password securely.
+ Reads the last account number from a CSV file to generate a new account number for the user.
+*/
+
 
 class UserData{ /// changes include replacing C type arras to more secure cpp ones
     public:
@@ -197,6 +259,14 @@ class UserData{ /// changes include replacing C type arras to more secure cpp on
     }
 };
 // card dummy
+
+/*
+ The Class Card:
+ Holds credit card details including the card number, CVV, 
+ expiration date, currency, balance, 
+ and authentication methods (PIN, password).
+*/
+
 class Card { // const kept, even in private for greater security.
 private:
     const std::string card_number;
@@ -225,6 +295,11 @@ private:
     }
     // Constructor to initialize the card number
     
+    /*
+     The GetCurrentMonthYear() function:
+     Retrieves the current month and year
+    */
+
     void GetCurrentMonthYear(int &currentmonth, int &currentyear) const{
         time_t t = time (0);
         struct tm*now = localtime(&t);
@@ -232,6 +307,10 @@ private:
         currentyear = (now ->tm_year) % 100; // gets last two digits by using modulo and 1900.
     }
 
+    /*
+     The IsCardExpired() function:
+     Checks if the card is expired based on the expiry month and year
+    */
     bool IsCardExpired(int expmonth, int expyear) const {
         int currentmonth, currentyear; // access time in format.
         GetCurrentMonthYear(currentmonth, currentyear);
@@ -258,7 +337,13 @@ private:
             throw std::runtime_error("Your card is expired");
         }
     }
- ///luhn greater strcture and comments. + Log (n) better results. 
+
+
+ //luhn greater strcture and comments. + Log (n) better results. 
+    /*
+     The ValidatedLuhn() function:
+     Validates the card number using the Luhn algorithm
+    */
     bool ValidatedLuhn() const {
         if (card_number.empty()) {
         std::cout << "Card number is empty" << std::endl;
@@ -289,6 +374,11 @@ private:
         return (sum % 10 == 0);
     }
  //finish of lunhu
+
+    /*
+     The DetermineCardType () function:
+     Identify the card type (Visa, MasterCard)
+    */
     std::string DetermineCardType () const {
         if (card_number[0] == '4' && (card_number.length() == 13 || card_number.length() == 16 || card_number.length() == 19)) {
         return "The Card is Visa";
@@ -323,6 +413,11 @@ public:
         }
     }
 
+    /*
+     The check() function: 
+     Checks if the card number is valid and displays the card type
+    */
+
     void check() const {
         if (card_number.empty()) {
             std::cout << "Card number is empty" << std::endl; // Check for empty input
@@ -353,7 +448,10 @@ public:
         }
     }
 
-    // Card Getter functions
+    /*
+     Card Getter functions:
+     Encrypt card data using RSA before running it
+    */ 
     std::string getCardNumber() const {
         return encryptRSA(card_number, BANK_PUBLIC_KEY);
     }
@@ -374,6 +472,15 @@ public:
     }
 };
 
+/*
+ The Class bank:
+ Contains RSA key pairs (public and private) for encryption and decryption.
+ Handles PIN and password validation.
+ Manages user balance changes in a CSV file.
+ Verifies card details using encrypted card information and the bank's private key.
+ Manages secret keys for AES encryption and decryption, used to protect sensitive data in CSV files.
+*/
+
 class bank {
     private:
         private:
@@ -384,6 +491,13 @@ class bank {
         const int correctPin = 1234;                 // Correct PIN (in a real app, these values would be securely stored)
         const std::string correctPassword = "Password123";
     public:
+
+    /*
+     The setterSecretKey() function:
+     Regenerates the AES secret key for encryption/decryption.
+     Calls GenerateAESKey() with the defined key size (AES_256_KEY_SIZE). 
+     This is useful when the key needs to be updated or refreshed for security reasons.
+    */
 
     void setterSecretKey() {
         secretKey = GenerateAESKey(AES_256_KEY_SIZE);
@@ -399,7 +513,12 @@ class bank {
         return userPassword == correctPassword;
     }
 
-    // Function to handle the overall authentication process
+    /*Function to handle the overall authentication process for PIN or Password:
+        Uses a loop to allow multiple attempts (up to MAX_ATTEMPTS).
+        If method == "PIN", it calls ValidatePIN() using the user's PIN.
+        If method == "Password", it calls ValidatePassword() using the user's password.
+        Returns true on successful authentication and false after MAX_ATTEMPTS if the user fails to authenticate.
+    */
     bool Authenticate(const std::string& method, const UserData& user) {
         int attempts = 0;
         while (attempts < MAX_ATTEMPTS) {
@@ -459,7 +578,12 @@ class bank {
         return encoded;
     }
 
-    // Print the public and private keys in Base64 encoded form
+    /*
+     The printKeys() function:
+     Print the public and private keys in Base64 encoded form
+     Calls encodeKeyToBase64() for both the public and private keys.
+     Outputs them to the console.
+     */
     void printKeys() {
         std::string encodedPublicKey = encodeKeyToBase64(publicKey);
         std::string encodedPrivateKey = encodeKeyToBase64(privateKey);
@@ -470,7 +594,7 @@ class bank {
         std::cout << "Private Key (Base64 Encoded): \n" << encodedPrivateKey << "\n";
     }
 
-
+    //Create a user
     void CreatUser() {
         std::string fname;
         std::cout << "Enter first name: " << std::endl;
@@ -494,6 +618,16 @@ class bank {
         //customer.SaveToCSV();
         customer.DisplayUserInfo();
     }
+
+    /*
+     The balanceChange() function:
+     Updates the balance on a card after transaction
+     Reads the card_data.csv file.
+     Finds the entry matching the given card_number.
+     Verifies if the balance is sufficient for the transaction (i.e., balance >= cost).
+     Updates the balance if sufficient, or returns an error if not.
+     Writes the modified data back to the file.
+    */
 
     std::string balanceChange(const std::string card_number, double cost) {
         std::string filename = "card_data.csv";
@@ -543,6 +677,13 @@ class bank {
         return "Transaction was successful";
     }
 
+    /*
+     The checkCardDetail() function:
+     Validates the card details by decrypting and checking against the database.
+     Decrypts sensitive fields like cardNumber, accountNb, CVV, ExpDate, and Currency using the bank's RSA private key.
+     Reads the credit_card.csv file and compares the decrypted values with the data in the file.
+     Returns true if the details match, false otherwise.
+    */
 
     bool checkCardDetail(const Card& card) {
         std::string cardNum = decryptRSA(card.getCardNumber(), privateKey);
@@ -576,6 +717,13 @@ class bank {
         return found;
     }
 
+    /*
+     The split() function:
+     Splits a CSV line into a vector of values.
+     Splits the input string line by the delimiter (comma) 
+     Returns the values as a vector of strings.
+    */
+
     std::vector<std::string> split(const std::string& line, char delimiter) {
         std::vector<std::string> values;
         std::string value;
@@ -588,6 +736,10 @@ class bank {
         return values;
     }
 
+    /*
+     The join() function:
+     Joins a vector of strings into a single string, separated by the specified delimiter.
+    */
     std::string join(const std::vector<std::string>& values, char delimiter) {
         std::string result;
         for (size_t i = 0; i < values.size(); ++i) {
@@ -597,18 +749,6 @@ class bank {
 
         return result;
     }
-        /*
-        read and write the data from csv file (geters and setters) x
-        fetch the data x
-        bank should call encryption and decryption functions
-        then check the functions
-        respond to terminal  
-        hash function that hash the passowords in the terminal and the bank 
-        compare the hash values inside the terminal 
-        
-        private key only for the bank and public key for everyone
-        */
-        
         
         //public:
             //bank(const std::string& );
@@ -639,6 +779,11 @@ class terminal {
         terminal() {
             // Perform initialization if necessary
         }
+
+        /*
+         The generateTUN() function:
+         Generates a random, unique transaction number (TUN)
+        */
 
         long long int generateTUN(){
             std::random_device rd;
@@ -695,6 +840,14 @@ class terminal {
 };
 
 // Read, Write and Encrypt CSV
+
+/*
+ The readCSV() function:
+ Reads data from a CSV file into a 2D vector.
+ Opens the file, reads each line
+ Splits it into values using comma
+ Each row is stored as a vector, and all rows are collected in a 2D vector.
+*/
 std::vector<std::vector<std::string>> readCSV(const std::string& filename) {
     std::ifstream file(filename);
     std::vector<std::vector<std::string>> data;
@@ -714,6 +867,11 @@ std::vector<std::vector<std::string>> readCSV(const std::string& filename) {
     return data;
 }
 
+/*
+ The writeCSV() function:
+ Writes a 2D vector of data back to a CSV file.
+*/
+
 void writeCSV(const std::string& filename, const std::vector<std::vector<std::string>>& data) {
     std::ofstream file(filename);
     for (const auto& row : data) {
@@ -728,6 +886,10 @@ void writeCSV(const std::string& filename, const std::vector<std::vector<std::st
     file.close();
 }
 
+/*
+ The encryptCSV() function:
+ Encrypts each value in a CSV file using AES encryption.
+*/
 void encryptCSV(const std::string& inputFilename, const std::string& outputFilename, const CryptoPP::SecByteBlock& key, const CryptoPP::SecByteBlock& iv) {
     std::vector<std::vector<std::string>> data = readCSV(inputFilename);
 
